@@ -4,15 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Creator sign up — Influnet</title>
-  <link rel="icon" type="image/png" href="./Asset/favicon.png">
-  <script src="./app-config.js"></script>
-  <script>
-    var target = typeof influnetAppUrl === "function" ? influnetAppUrl("/signup/influencer") : "./app/signup/influencer";
-    location.replace(target);
-  </script>
+  <link rel="icon" type="image/png" href="/Asset/favicon.png">
+  <meta http-equiv="refresh" content="0;url=/signup/influencer">
+  <script>location.replace("/signup/influencer");</script>
 </head>
 <body>
-  <p>Opening creator sign up… <a id="go" href="./app/signup/influencer">Continue</a> · <a href="./index.html">Back to home</a></p>
-  <script>document.getElementById("go").href = target;</script>
+  <p>Opening creator sign up… <a href="/signup/influencer">Continue</a> · <a href="/">Back to home</a></p>
 </body>
 </html>

@@ -4,17 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Log in — Influnet</title>
-  <link rel="icon" type="image/png" href="./Asset/favicon.png">
-  <script src="./app-config.js"></script>
-  <script>
-    var target = typeof influnetAppUrl === "function" ? influnetAppUrl("/login") : "./app/login";
-    location.replace(target);
-  </script>
+  <link rel="icon" type="image/png" href="/Asset/favicon.png">
+  <meta http-equiv="refresh" content="0;url=/login">
+  <script>location.replace("/login");</script>
 </head>
 <body>
-  <p>Opening log in… <a id="go" href="./app/login">Continue</a> · <a href="./index.html">Back to home</a></p>
-  <script>
-    document.getElementById("go").href = target;
-  </script>
+  <p>Opening log in… <a href="/login">Continue</a> · <a href="/">Back to home</a></p>
 </body>
 </html>

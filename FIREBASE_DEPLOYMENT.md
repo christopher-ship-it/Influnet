@@ -1,27 +1,30 @@
 # Firebase Hosting — Influnet
 
-Firebase serves **one site** from this folder:
+Firebase serves **one React SPA** from this folder.
 
 | URL | What |
 |-----|------|
-| `/` | Marketing (`index.html`) |
-| `/discover.html` | Creator discover (static) |
-| `/app/**` | React app (login, signup, dashboards) |
-| `login.html`, `signup.html`, … | Short links from `index.html` → redirect into `/app/...` |
+| `/` | Marketing landing + app (client routes) |
+| `/login`, `/signup`, `/dashboard`, … | React screens |
+| `/Asset/**` | Images, logos, media |
+| `/assets/**` | Vite JS/CSS bundles |
+| `login.html`, `discover.html`, … | Legacy short links → redirect to React routes |
 
-Project ID is in `.firebaserc` (`influnet-63626`). Links on the marketing pages use same-origin `/app/...` in production (see `app-config.js`).
+Project ID is in `.firebaserc` (`influnet-63626`).
+
+`/app/**` permanently redirects to the same path without `/app` (old bookmarks).
 
 ---
 
 ## Before each deploy
 
-Build the React app and copy it into `app/` (required for login/signup to work).
+Build the React app and copy assets into the site root (required for the site to work).
 
-**WSL or Git Bash** (recommended), from `d:\influnet.io\Influnet-Io\Influnet-Io`:
+**WSL or Git Bash**, from `d:\influnet.io\Influnet-Io\Influnet-Io`:
 
 ```bash
 export PORT=5000
-export BASE_PATH=/app/
+export BASE_PATH=/
 pnpm install
 pnpm --filter @workspace/influnet build
 ```
@@ -29,16 +32,19 @@ pnpm --filter @workspace/influnet build
 Copy output:
 
 ```bash
-cp -r artifacts/influnet/dist/public/* /mnt/d/influnet/app/
+cp -r artifacts/influnet/dist/public/assets/* /mnt/d/influnet/assets/
+cp artifacts/influnet/dist/public/favicon.svg /mnt/d/influnet/
 ```
 
-**Windows PowerShell** (after a successful build):
+If hashed bundle names changed, update `index.html` script/link paths.
+
+**Windows PowerShell**:
 
 ```powershell
 .\scripts\build-react-app.ps1
 ```
 
-Confirm `app/index.html` and `app/assets/` exist (not only the “not built yet” placeholder).
+Confirm `assets/index-*.js` exists and `index.html` references match.
 
 ---
 
@@ -65,38 +71,34 @@ firebase hosting:channel:deploy preview
 3. Add the DNS records Firebase shows at your registrar
 4. Wait for SSL provisioning (often minutes, DNS up to 24h)
 
-Marketing and the app share the same origin, so `/app/login` works without CORS changes.
+All routes share one origin; no `/app` prefix.
 
 ---
 
 ## What gets uploaded
 
-- `index.html`, `discover.html`, `app-config.js`, `site-nav.js`, `Asset/`
-- `app/` — full Vite build (`index.html`, `assets/*`, etc.)
+- `index.html` — SPA shell
+- `assets/` — Vite build
+- `Asset/` — marketing media
+- `favicon.svg`, `robots.txt`, legacy `*.html` redirects
 
-Not uploaded (see `firebase.json` `ignore`): `main.py`, `scripts/`, dotfiles, Replit files.
+Not uploaded (see `firebase.json` `ignore`): `main.py`, `scripts/`, `influnet.io/`, dotfiles, Replit files.
 
 ---
 
 ## Routing
 
-- Static files are served as-is (`/index.html`, `/Asset/...`, `/app/assets/...`).
-- Any other path under `/app/` (e.g. `/app/login`, `/app/dashboard`) is rewritten to `/app/index.html` for client-side routing (Wouter).
+- Existing static files are served as-is (`/Asset/...`, `/assets/...`, `login.html`, etc.).
+- All other paths rewrite to `/index.html` for client-side routing (Wouter, base `/`).
 
 ---
 
-## Local testing (matches Firebase)
-
-```bash
-py main.py
-# http://localhost:8080/          → marketing
-# http://localhost:8080/app/login → React (after build in app/)
-```
-
-Or emulate hosting:
+## Local testing
 
 ```bash
 firebase emulators:start --only hosting
+# http://localhost:5000/           → landing
+# http://localhost:5000/login      → React login
 ```
 
 ---
@@ -105,9 +107,10 @@ firebase emulators:start --only hosting
 
 | Issue | Fix |
 |-------|-----|
-| `/app/login` shows “React app not built yet” | Run build + copy into `app/` before `firebase deploy` |
-| 404 on `/app/dashboard` after refresh | Ensure `rewrites` for `/app/**` are in `firebase.json` and redeploy |
-| Old JS after deploy | Hard refresh; `app/index.html` is `no-cache`; hashed files under `app/assets/` are long-cached |
+| Blank page at `/` | Run `build-react-app.ps1`; check browser console for 404 on `/assets/*.js` |
+| 404 on `/login` after refresh | Ensure `rewrites` in `firebase.json` and redeploy |
+| Old `/app/login` links | Firebase 301 redirects `/app/**` → `/**` |
+| Old JS after deploy | Hard refresh; `index.html` is `no-cache`; hashed files under `/assets/` are long-cached |
 | Deploy permission error | `firebase login` and confirm project in `.firebaserc` |
 
 ---
@@ -115,12 +118,11 @@ firebase emulators:start --only hosting
 ## CI (optional)
 
 ```yaml
-# Example GitHub Actions step
 - run: |
-    export PORT=5000 BASE_PATH=/app/
+    export PORT=5000 BASE_PATH=/
     pnpm install --filter @workspace/influnet...
     pnpm --filter @workspace/influnet build
-    cp -r artifacts/influnet/dist/public/* $GITHUB_WORKSPACE/influnet/app/
+    cp -r artifacts/influnet/dist/public/assets/* $GITHUB_WORKSPACE/influnet/assets/
 - run: firebase deploy --only hosting --token ${{ secrets.FIREBASE_TOKEN }}
 ```
 

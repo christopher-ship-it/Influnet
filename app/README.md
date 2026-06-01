@@ -1,46 +1,59 @@
-# Influnet React app (from `d:\influnet.io`)
+# Influnet React app (site root)
 
-The marketing site (`index.html`) stays at the site root. The React app is served under **`/app/`**.
+The full site is a **single React SPA** served from the repository root (`/`).
 
-## Build and copy into this folder
+## Build and deploy
 
-From `d:\influnet.io\Influnet-Io\Influnet-Io` (requires [pnpm](https://pnpm.io)):
+From `D:\influnet.io\Influnet-Io\Influnet-Io` (requires [pnpm](https://pnpm.io)):
 
 ```bash
+export PORT=5000
+export BASE_PATH=/
 pnpm install
-set PORT=5000
-set BASE_PATH=/app/
 pnpm --filter @workspace/influnet build
 ```
 
-Then copy the build output:
+Copy build output into this repo:
 
 ```powershell
-Remove-Item -Recurse -Force "d:\influnet\app\*" -ErrorAction SilentlyContinue
-Copy-Item -Recurse "d:\influnet.io\Influnet-Io\Influnet-Io\artifacts\influnet\dist\public\*" "d:\influnet\app\"
+.\scripts\build-react-app.ps1
 ```
 
-## Local development (two servers)
+Or manually:
 
-1. **Marketing site** (this folder): `py main.py` → http://localhost:8080  
-2. **React app** (influnet.io repo):
+```powershell
+Copy-Item -Recurse "D:\influnet.io\Influnet-Io\Influnet-Io\artifacts\influnet\dist\public\assets\*" "D:\influnet\assets\"
+```
+
+After a build, if Vite emits new hashed filenames, update `script` / `link` tags in `D:\influnet\index.html`.
+
+## Routes (same origin)
+
+| Path | Screen |
+|------|--------|
+| `/` | Marketing landing |
+| `/login` | Log in |
+| `/signup` | Sign up hub |
+| `/signup/business` | Business sign up |
+| `/signup/influencer` | Creator sign up |
+| `/dashboard` | Business dashboard |
+| `/dashboard/influencer` | Creator dashboard |
+| `/influencers` | Creator discover |
+| `/for-businesses`, `/for-influencers`, `/how-it-works`, `/pricing` | Marketing pages |
+
+Legacy `/app/**` URLs redirect to the same paths without `/app` (see `firebase.json`).
+
+## Local development
 
 ```bash
-cd d:\influnet.io\Influnet-Io\Influnet-Io
-set PORT=5000
-set BASE_PATH=/app/
+cd D:\influnet.io\Influnet-Io\Influnet-Io
+export PORT=5000 BASE_PATH=/
 pnpm --filter @workspace/influnet dev
 ```
 
-Links from `index.html` open http://localhost:5000/app/login (etc.) automatically.
+Or after `build-react-app.ps1`, use Firebase emulator:
 
-## Routes
-
-| Path | React screen |
-|------|----------------|
-| `/app/login` | Log in |
-| `/app/signup` | Sign up hub |
-| `/app/signup/business` | Business sign up |
-| `/app/signup/influencer` | Creator sign up |
-| `/app/dashboard` | Business dashboard |
-| `/app/dashboard/influencer` | Creator dashboard |
+```bash
+cd D:\influnet
+firebase emulators:start --only hosting
+```

@@ -9,7 +9,8 @@
       ".replit",
       "REPLIT_DEPLOY.md",
       "scripts/**",
-      "app/README.md"
+      "app/README.md",
+      "influnet.io/**"
     ],
     "headers": [
       {
@@ -22,7 +23,7 @@
         ]
       },
       {
-        "source": "/app/assets/**",
+        "source": "/assets/**",
         "headers": [
           {
             "key": "Cache-Control",
@@ -31,7 +32,7 @@
         ]
       },
       {
-        "source": "/app/index.html",
+        "source": "/index.html",
         "headers": [
           {
             "key": "Cache-Control",
@@ -40,10 +41,27 @@
         ]
       }
     ],
-    "rewrites": [
+    "redirects": [
+      {
+        "source": "/app",
+        "destination": "/",
+        "type": 301
+      },
+      {
+        "source": "/app/",
+        "destination": "/",
+        "type": 301
+      },
       {
         "source": "/app/**",
-        "destination": "/app/index.html"
+        "destination": "/:splat",
+        "type": 301
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
       }
     ]
   }
