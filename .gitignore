@@ -1,0 +1,9 @@
+.firebase/
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+__pycache__/
+*.pyc
+.env
+.env.*

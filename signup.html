@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign up — Influnet</title>
+  <link rel="icon" type="image/png" href="./Asset/favicon.png">
+  <script src="./app-config.js"></script>
+  <script>
+    var target = typeof influnetAppUrl === "function" ? influnetAppUrl("/signup") : "./app/signup";
+    location.replace(target);
+  </script>
+</head>
+<body>
+  <p>Opening sign up… <a id="go" href="./app/signup">Continue</a> · <a href="./index.html">Back to home</a></p>
+  <script>document.getElementById("go").href = target;</script>
+</body>
+</html>

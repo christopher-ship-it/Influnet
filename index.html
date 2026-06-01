@@ -1,0 +1,2786 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Influnet — Where Influence Meets Opportunity</title>
+  <link rel="icon" type="image/png" href="./Asset/favicon.png">
+  <script src="./app-config.js"></script>
+  <script src="./site-nav.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] },
+          colors: {
+            brand: {
+              dark: '#050510',
+              card: '#0f0f23',
+              pink: '#ff2e88',
+              magenta: '#ee3e96',
+              coral: '#f26e59',
+              orange: '#f26e59',
+              purple: '#7c3aed',
+            }
+          },
+          backgroundImage: {
+            'hero-glow': 'radial-gradient(ellipse at 70% 20%, rgba(255,46,136,0.25) 0%, transparent 55%), radial-gradient(ellipse at 20% 80%, rgba(124,58,237,0.2) 0%, transparent 50%)',
+            'gradient-brand': 'linear-gradient(90deg, #ee3e96, #f26e59)',
+            'gradient-cta': 'linear-gradient(90deg, #ee3e96, #ff6b6b, #f26e59)',
+            'gradient-text': 'linear-gradient(90deg, #ffffff, #ff4fa2)',
+            'trust-banner': 'linear-gradient(135deg, #0a1628 0%, #1a0a2e 50%, #0f172a 100%)',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .text-gradient { background: linear-gradient(90deg, #fff, #ff4fa2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .text-gradient-pink { background: linear-gradient(90deg, #ee3e96, #f26e59); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .text-gradient-opportunity { background: linear-gradient(90deg, #ff2e88, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .premium-btn {
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,0.22), rgba(255,255,255,0.05)) padding-box,
+        linear-gradient(90deg, #ee3e96, #ff6b6b, #7c3aed) border-box;
+      box-shadow:
+        0 10px 30px rgba(238, 62, 150, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      overflow: hidden;
+      backdrop-filter: blur(6px);
+    }
+    .premium-btn::after {
+      content: "";
+      position: absolute;
+      inset: -2px;
+      background: linear-gradient(120deg, transparent 40%, rgba(255,255,255,0.35) 50%, transparent 60%);
+      transform: translateX(-120%);
+      transition: transform .7s ease;
+      pointer-events: none;
+    }
+    .premium-btn:hover::after {
+      transform: translateX(120%);
+    }
+    .hero-wave {
+      background:
+        linear-gradient(180deg, rgba(5, 5, 16, 0.35), rgba(5, 5, 16, 0.6)),
+        url('./Asset/hero-bg.webp') center/cover no-repeat,
+        radial-gradient(circle at 55% 84%, rgba(255, 46, 136, 0.55), transparent 28%),
+        radial-gradient(circle at 75% 30%, rgba(255, 46, 136, 0.2), transparent 32%),
+        radial-gradient(circle at 40% 15%, rgba(124, 58, 237, 0.35), transparent 36%),
+        linear-gradient(180deg, rgba(5, 5, 16, 0.08), rgba(5, 5, 16, 0.65));
+      background-repeat: no-repeat;
+      background-size: cover;
+      background-position: center;
+    }
+    .page4-bg {
+      background:
+        linear-gradient(180deg, rgba(5, 5, 16, 0.2), rgba(5, 5, 16, 0.45)),
+        url('./Asset/page4-bg.webp') center/cover no-repeat;
+    }
+
+    /* Collaboration Discovery Suite — orange only (no dark/black) */
+    .discovery-suite {
+      --ds-orange: #f26e59;
+      --ds-orange-deep: #d45644;
+      --ds-orange-mid: #e86350;
+      --ds-orange-light: #f88f7d;
+      --ds-orange-pale: #ffd4cc;
+      --ds-orange-cream: #fff0eb;
+      --ds-orange-rgb: 242, 110, 89;
+      background: #ffffff;
+    }
+    .discovery-suite__panel {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1.2rem;
+      min-height: min(58vh, 440px);
+      display: flex;
+      align-items: stretch;
+      color: #fff;
+      background:
+        radial-gradient(ellipse 85% 75% at 15% 90%, #f88f7d 0%, transparent 55%),
+        radial-gradient(ellipse 80% 70% at 95% 15%, #f58572 0%, transparent 52%),
+        radial-gradient(ellipse 60% 50% at 50% 50%, #f26e59 0%, transparent 70%),
+        linear-gradient(145deg, #f26e59 0%, #e86350 38%, #f26e59 62%, #d45644 100%);
+    }
+    @media (min-width: 1024px) {
+      .discovery-suite__panel {
+        min-height: 520px;
+      }
+    }
+    .discovery-suite__panel::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.14) 0%, transparent 45%, rgba(212, 86, 68, 0.08) 100%);
+    }
+    .discovery-suite__visual {
+      position: relative;
+      width: min(92vw, 320px);
+      max-width: 320px;
+      margin: 0 auto;
+      align-self: start;
+    }
+    @media (min-width: 640px) {
+      .discovery-suite__visual {
+        max-width: 340px;
+      }
+    }
+    @media (min-width: 1024px) {
+      .discovery-suite__visual {
+        width: 100%;
+        max-width: 360px;
+        margin: 0;
+      }
+    }
+    .discovery-suite__media {
+      position: relative;
+      min-height: 240px;
+      padding-bottom: 3.25rem;
+    }
+    @media (min-width: 1024px) {
+      .discovery-suite__media { min-height: 280px; padding-bottom: 3.5rem; }
+    }
+    .discovery-suite__demo {
+      position: relative;
+      z-index: 1;
+      width: 54%;
+      max-width: 168px;
+      border-radius: 0.85rem;
+      overflow: hidden;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+      line-height: 0;
+      background: rgba(255, 255, 255, 0.12);
+    }
+    .discovery-suite__demo img,
+    .discovery-suite__demo video {
+      width: 100%;
+      height: auto;
+      max-height: min(36vh, 280px);
+      object-fit: cover;
+      object-position: center top;
+      display: block;
+      vertical-align: top;
+    }
+    .discovery-suite__portrait {
+      position: relative;
+      z-index: 1;
+      width: 58%;
+      max-width: 220px;
+      aspect-ratio: 3 / 4;
+      border-radius: 1.25rem;
+      overflow: hidden;
+      box-shadow: 0 20px 44px rgba(212, 86, 68, 0.45);
+      border: 3px solid rgba(255, 255, 255, 0.35);
+      animation: ds-portrait-loop 7s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+    }
+    .discovery-suite__portrait img,
+    .discovery-suite__portrait video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center top;
+    }
+    .discovery-suite__card {
+      position: absolute;
+      z-index: 2;
+      right: 0;
+      bottom: -1.15rem;
+      left: 42%;
+      width: calc(58% - 0.25rem);
+      max-width: 168px;
+      padding: 0.55rem 0.6rem 0.6rem;
+      border-radius: 0.7rem;
+      background: #ffffff;
+      color: #111827;
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    @media (min-width: 640px) {
+      .discovery-suite__card {
+        bottom: -1.35rem;
+        max-width: 178px;
+      }
+    }
+    .discovery-suite__card-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 0.35rem;
+      color: #111827;
+    }
+    .discovery-suite__card-cycle {
+      position: relative;
+      height: 7.5rem;
+      overflow: hidden;
+    }
+    .discovery-suite__card-step {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+      opacity: 0;
+      animation: ds-card-step-fade 12s ease-in-out infinite both;
+    }
+    .discovery-suite__card-step:nth-child(1) { animation-delay: 0s; }
+    .discovery-suite__card-step:nth-child(2) { animation-delay: -4s; }
+    .discovery-suite__card-step:nth-child(3) { animation-delay: -8s; }
+    @keyframes ds-card-step-fade {
+      0%, 24% { opacity: 1; transform: translateY(0); visibility: visible; }
+      28%, 100% { opacity: 0; transform: translateY(0); visibility: hidden; }
+    }
+    .discovery-suite__card-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 0.3rem 0.4rem;
+      align-items: end;
+      margin-bottom: 0.3rem;
+    }
+    .discovery-suite__field-label {
+      display: block;
+      font-size: 0.5rem;
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 0.12rem;
+    }
+    .discovery-suite__field-value {
+      display: block;
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: #111827;
+      padding: 0.15rem 0 0.25rem;
+      margin-bottom: 0;
+      max-width: 100%;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+      border-bottom: 1px solid #f5b8ad;
+    }
+    .discovery-suite__field-value--area {
+      font-weight: 500;
+      line-height: 1.25;
+      font-size: 0.55rem;
+      color: #374151;
+      padding: 0.15rem 0 0.28rem;
+      margin-bottom: 0.22rem;
+      max-width: 100%;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      border-bottom: 1px solid #f5b8ad;
+    }
+    .discovery-suite__logo-box {
+      width: 1.65rem;
+      height: 1.65rem;
+      border-radius: 0.35rem;
+      border: 1px dashed #d1d5db;
+      background: linear-gradient(135deg, #fff5f3 0%, #ffe8e4 100%);
+    }
+    .discovery-suite__tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.2rem;
+      max-width: 100%;
+      padding-bottom: 0;
+    }
+    .discovery-suite__tag {
+      font-size: 0.48rem;
+      font-weight: 600;
+      color: var(--ds-orange);
+      background: #fff0eb;
+      border: 1px solid #ffd4cc;
+      padding: 0.12rem 0.3rem;
+      border-radius: 9999px;
+      white-space: nowrap;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .discovery-suite__content {
+      text-align: left;
+      align-self: start;
+      width: 100%;
+    }
+    @media (min-width: 1024px) {
+      .discovery-suite__content {
+        padding-top: 0.25rem;
+        padding-left: 0.5rem;
+      }
+    }
+    .discovery-suite__headline {
+      font-size: clamp(1.5rem, 3.2vw, 2.35rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.25rem;
+    }
+    .discovery-suite__headline-accent {
+      color: #fff;
+      text-shadow: 0 2px 20px rgba(212, 86, 68, 0.35);
+    }
+    .discovery-suite__cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.85rem 1.75rem;
+      border-radius: 9999px;
+      background: #fff;
+      color: var(--ds-orange);
+      font-size: 0.95rem;
+      font-weight: 700;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+      box-shadow: 0 8px 28px rgba(212, 86, 68, 0.35);
+    }
+    .discovery-suite__cta:hover {
+      transform: translateY(-2px);
+      background: var(--ds-orange-cream);
+      box-shadow: 0 12px 32px rgba(212, 86, 68, 0.45);
+    }
+    @keyframes ds-portrait-loop {
+      0%, 72%, 100% { opacity: 1; transform: translateX(0); }
+      4% { opacity: 0; transform: translateX(-36px); }
+      14% { opacity: 1; transform: translateX(0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .discovery-suite__portrait { animation: none; }
+      .discovery-suite__card-step {
+        animation: none;
+        opacity: 1;
+        position: relative;
+      }
+      .discovery-suite__card-step:not(:first-child) { display: none; }
+      .discovery-suite__card-cycle { min-height: 0; }
+    }
+    details summary { list-style: none; }
+    details summary::-webkit-details-marker { display: none; }
+    details[open] summary .faq-icon { transform: rotate(45deg); }
+
+    /* Combined showcase (Pages 2 & 3) */
+    .influ-showcase-cycle { --cycle: 14s; }
+
+    .influ-showcase-stack {
+      position: relative;
+      min-height: 360px;
+    }
+    @media (min-width: 1024px) {
+      .influ-showcase-stack { min-height: 340px; }
+      .influ-showcase-stack--demo { min-height: 430px; }
+    }
+
+    .influ-showcase-panel {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transform: translateY(14px);
+      pointer-events: none;
+    }
+    .influ-showcase-panel--match {
+      animation: showcasePanelMatch var(--cycle) ease-in-out infinite;
+    }
+    .influ-showcase-panel--connect {
+      animation: showcasePanelConnect var(--cycle) ease-in-out infinite;
+    }
+
+    .influ-showcase-steps {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1.75rem;
+    }
+    .influ-showcase-step {
+      height: 0.35rem;
+      flex: 1;
+      border-radius: 9999px;
+      background: #ece7f3;
+      overflow: hidden;
+    }
+    .influ-showcase-step span {
+      display: block;
+      height: 100%;
+      width: 0;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #ee3e96, #7c3aed);
+    }
+    .influ-showcase-step--match span {
+      animation: showcaseStepMatch var(--cycle) linear infinite;
+    }
+    .influ-showcase-step--connect span {
+      animation: showcaseStepConnect var(--cycle) linear infinite;
+    }
+
+    .influ-demo {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      max-width: 380px;
+      margin-inline: auto;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .influ-demo--match { animation: showcaseDemoMatch var(--cycle) ease-in-out infinite; }
+    .influ-demo--connect { animation: showcaseDemoConnect var(--cycle) ease-in-out infinite; }
+
+    .influ-demo-card {
+      background: #fff;
+      border-radius: 1rem;
+      border: 1px solid rgba(238, 62, 150, 0.12);
+      box-shadow: 0 24px 60px rgba(58, 26, 111, 0.14);
+      overflow: hidden;
+    }
+    .influ-demo-gradient {
+      background: linear-gradient(to bottom, #f26e59, #ee3e96, #3A1A6F);
+      color: #fff;
+    }
+    .influ-demo-field {
+      background: #fff;
+      border-radius: 0.5rem;
+      padding: 0.45rem 0.65rem;
+      font-size: 0.68rem;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .influ-demo-label {
+      font-size: 0.58rem;
+      color: rgba(255, 255, 255, 0.78);
+      margin-bottom: 0.2rem;
+    }
+    .influ-demo-btn {
+      width: 100%;
+      margin-top: 0.75rem;
+      padding: 0.55rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #fff;
+      background: linear-gradient(90deg, #f26e59, #ee3e96);
+      box-shadow: 0 8px 20px rgba(238, 62, 150, 0.35);
+      position: relative;
+      isolation: isolate;
+    }
+    .influ-demo-btn::after {
+      content: "";
+      position: absolute;
+      inset: -3px;
+      border-radius: inherit;
+      border: 2px solid rgba(255, 255, 255, 0.95);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .influ-demo-btn--match::after {
+      animation: btnTapHighlight var(--cycle) ease-out infinite;
+    }
+    .influ-demo-btn--connect::after {
+      animation: btnTapHighlightConnect var(--cycle) ease-out infinite;
+    }
+    .influ-demo-results {
+      padding: 0.85rem 1rem 1rem;
+      background: #faf7fb;
+    }
+    .influ-demo-result {
+      background: #fff;
+      border: 1px solid #ece7f3;
+      border-radius: 0.65rem;
+      padding: 0.55rem 0.7rem;
+      font-size: 0.68rem;
+      color: #374151;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+    .influ-demo-badge {
+      font-size: 0.58rem;
+      font-weight: 600;
+      padding: 0.15rem 0.45rem;
+      border-radius: 9999px;
+      white-space: nowrap;
+    }
+    .influ-demo-badge--verified {
+      background: rgba(124, 58, 237, 0.12);
+      color: #7c3aed;
+    }
+    .influ-demo-badge--sent {
+      background: rgba(238, 62, 150, 0.12);
+      color: #ee3e96;
+    }
+    .influ-demo-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid #f3f4f6;
+      font-size: 0.72rem;
+      color: #374151;
+    }
+    .influ-demo-row:last-child { border-bottom: none; }
+    .influ-demo-avatar {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, #ee3e96, #7c3aed);
+      flex-shrink: 0;
+    }
+    .influ-showcase-pointer {
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      pointer-events: none;
+      z-index: 20;
+      transform-origin: 0 0;
+      filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.25));
+      animation: showcaseHand var(--cycle) cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      opacity: 0;
+    }
+    .influ-showcase-pointer svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .influ-demo--match .influ-demo-btn--match {
+      animation: matchBtnPress var(--cycle) ease-in-out infinite;
+    }
+    .influ-demo--match .influ-demo-result--extra {
+      max-height: 0;
+      opacity: 0;
+      margin-top: 0;
+      overflow: hidden;
+      animation: matchResultReveal var(--cycle) ease-in-out infinite;
+    }
+
+    .influ-demo--connect .influ-demo-btn--connect {
+      animation: connectBtnPress var(--cycle) ease-in-out infinite;
+    }
+    .influ-demo--connect .influ-demo-row--new {
+      max-height: 0;
+      opacity: 0;
+      padding-top: 0;
+      padding-bottom: 0;
+      overflow: hidden;
+      border-bottom-width: 0;
+      animation: connectRowReveal var(--cycle) ease-in-out infinite;
+    }
+    .influ-demo-status-wrap {
+      position: relative;
+      display: inline-flex;
+      min-width: 3.5rem;
+      justify-content: center;
+    }
+    .influ-demo-status-sent {
+      position: absolute;
+      inset: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      animation: connectStatusText var(--cycle) ease-in-out infinite;
+    }
+    .influ-demo-status-pending {
+      animation: connectStatusTextPending var(--cycle) ease-in-out infinite;
+    }
+    .influ-demo--connect .influ-demo-status {
+      animation: connectStatusChange var(--cycle) ease-in-out infinite;
+    }
+
+    @keyframes showcasePanelMatch {
+      0%, 6% { opacity: 1; transform: translateY(0); }
+      44%, 50% { opacity: 1; transform: translateY(0); }
+      54%, 100% { opacity: 0; transform: translateY(-14px); }
+    }
+    @keyframes showcasePanelConnect {
+      0%, 50% { opacity: 0; transform: translateY(14px); }
+      56%, 94% { opacity: 1; transform: translateY(0); }
+      98%, 100% { opacity: 0; transform: translateY(-14px); }
+    }
+    @keyframes showcaseDemoMatch {
+      0%, 6% { opacity: 1; transform: translateY(0); pointer-events: auto; }
+      44%, 50% { opacity: 1; transform: translateY(0); }
+      54%, 100% { opacity: 0; transform: translateY(10px); pointer-events: none; }
+    }
+    @keyframes showcaseDemoConnect {
+      0%, 50% { opacity: 0; transform: translateY(10px); pointer-events: none; }
+      56%, 94% { opacity: 1; transform: translateY(0); pointer-events: auto; }
+      98%, 100% { opacity: 0; transform: translateY(10px); }
+    }
+    @keyframes showcaseStepMatch {
+      0% { width: 0; }
+      46% { width: 100%; }
+      50%, 100% { width: 100%; }
+    }
+    @keyframes showcaseStepConnect {
+      0%, 50% { width: 0; }
+      96% { width: 100%; }
+      100% { width: 100%; }
+    }
+
+    @keyframes showcaseHand {
+      0%, 5% { opacity: 0; transform: translate(245px, 20px); }
+      9%, 13% { opacity: 1; transform: translate(245px, 20px); }
+      23% { opacity: 1; transform: translate(162px, 226px); }
+      27% { opacity: 1; transform: translate(162px, 226px) scale(0.9); }
+      31%, 47% { opacity: 1; transform: translate(162px, 226px); }
+      51%, 55% { opacity: 0; transform: translate(245px, 20px); }
+      59%, 63% { opacity: 1; transform: translate(245px, 20px); }
+      73% { opacity: 1; transform: translate(182px, 180px); }
+      77% { opacity: 1; transform: translate(182px, 180px) scale(0.9); }
+      81%, 95% { opacity: 1; transform: translate(182px, 180px); }
+      99%, 100% { opacity: 0; transform: translate(245px, 20px); }
+    }
+    @keyframes btnTapHighlight {
+      0%, 25% { opacity: 0; transform: scale(1); }
+      27% { opacity: 1; transform: scale(1); }
+      33% { opacity: 0; transform: scale(1.06); }
+      34%, 100% { opacity: 0; transform: scale(1); }
+    }
+    @keyframes btnTapHighlightConnect {
+      0%, 74% { opacity: 0; transform: scale(1); }
+      76% { opacity: 1; transform: scale(1); }
+      82% { opacity: 0; transform: scale(1.06); }
+      83%, 100% { opacity: 0; transform: scale(1); }
+    }
+
+    @keyframes matchBtnPress {
+      0%, 26% { transform: scale(1); }
+      28% { transform: scale(0.96); box-shadow: 0 4px 12px rgba(238, 62, 150, 0.25); }
+      32%, 50% { transform: scale(1); }
+      51%, 100% { transform: scale(1); }
+    }
+    @keyframes matchResultReveal {
+      0%, 30% { max-height: 0; opacity: 0; margin-top: 0; }
+      36%, 46% { max-height: 52px; opacity: 1; margin-top: 0.5rem; }
+      50%, 100% { max-height: 0; opacity: 0; margin-top: 0; }
+    }
+
+    @keyframes connectBtnPress {
+      0%, 50% { transform: scale(1); }
+      76% { transform: scale(0.96); }
+      80%, 100% { transform: scale(1); }
+    }
+    @keyframes connectStatusTextPending {
+      0%, 50% { opacity: 1; }
+      78%, 100% { opacity: 0; }
+    }
+    @keyframes connectStatusText {
+      0%, 50% { opacity: 0; }
+      78%, 94% { opacity: 1; }
+      98%, 100% { opacity: 0; }
+    }
+    @keyframes connectStatusChange {
+      0%, 50% { background: rgba(124, 58, 237, 0.12); color: #7c3aed; }
+      78%, 94% { background: rgba(238, 62, 150, 0.12); color: #ee3e96; }
+      98%, 100% { background: rgba(124, 58, 237, 0.12); color: #7c3aed; }
+    }
+    @keyframes connectRowReveal {
+      0%, 50% { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
+      80%, 94% { max-height: 56px; opacity: 1; padding-top: 0.65rem; padding-bottom: 0.65rem; border-bottom-width: 1px; }
+      98%, 100% { max-height: 0; opacity: 0; padding-top: 0; padding-bottom: 0; }
+    }
+
+    .category-showcase {
+      position: relative;
+      overflow: visible;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 0%, rgba(238, 62, 150, 0.45) 0%, transparent 55%),
+        radial-gradient(ellipse 70% 55% at 85% 100%, rgba(124, 58, 237, 0.4) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 40% at 70% 20%, rgba(242, 110, 89, 0.35) 0%, transparent 45%),
+        linear-gradient(145deg, #050510 0%, #1a0a2e 45%, #12081f 100%);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 1.5rem;
+      padding: 2rem 1.25rem 1.75rem;
+      box-shadow:
+        0 20px 50px rgba(238, 62, 150, 0.18),
+        0 8px 28px rgba(58, 26, 111, 0.3);
+    }
+    @media (min-width: 640px) {
+      .category-showcase {
+        padding: 2.25rem 1.75rem 2rem;
+        border-radius: 1.75rem;
+      }
+    }
+    @media (min-width: 1024px) {
+      .category-showcase { padding: 2.5rem 2rem 2.25rem; border-radius: 2rem; }
+    }
+    .category-showcase__title {
+      position: relative;
+      z-index: 1;
+    }
+    .category-pills-grid {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      gap: 0.5rem 0.4rem;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      padding: 0.2rem;
+      overflow: visible;
+    }
+    @media (min-width: 640px) {
+      .category-pills-grid {
+        gap: 0.55rem 0.45rem;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+    @media (min-width: 900px) {
+      .category-pills-grid {
+        gap: 0.5rem 0.35rem;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+      }
+    }
+    .category-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.55rem;
+      background: #fff;
+      border-radius: 9999px;
+      font-size: 0.68rem;
+      font-weight: 600;
+      white-space: nowrap;
+      color: var(--pill-color);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      justify-self: center;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      cursor: pointer;
+      position: relative;
+      z-index: 0;
+      transform: scale(1);
+      transform-origin: center center;
+      transition:
+        transform 0.25s cubic-bezier(0.34, 1.4, 0.64, 1),
+        box-shadow 0.25s ease,
+        z-index 0s;
+    }
+    .category-pill:hover {
+      transform: scale(1.1);
+      z-index: 2;
+      box-shadow:
+        0 10px 28px rgba(0, 0, 0, 0.22),
+        0 0 0 1px rgba(255, 255, 255, 0.85);
+    }
+    .category-pill:focus-visible {
+      outline: 2px solid rgba(238, 62, 150, 0.85);
+      outline-offset: 2px;
+      transform: scale(1.08);
+      z-index: 2;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .category-pill {
+        transition: box-shadow 0.2s ease;
+      }
+      .category-pill:hover,
+      .category-pill:focus-visible {
+        transform: none;
+      }
+    }
+    @media (min-width: 640px) {
+      .category-pill {
+        font-size: 0.72rem;
+        padding: 0.45rem 0.65rem;
+        gap: 0.4rem;
+      }
+    }
+    @media (min-width: 900px) {
+      .category-pill {
+        font-size: 0.7rem;
+        padding: 0.42rem 0.5rem 0.42rem 0.45rem;
+        gap: 0.3rem;
+        width: auto;
+        max-width: none;
+      }
+    }
+    @media (min-width: 1100px) {
+      .category-pill {
+        font-size: 0.78rem;
+        padding: 0.48rem 0.75rem 0.48rem 0.6rem;
+        gap: 0.35rem;
+      }
+    }
+    .category-pill svg {
+      width: 1rem;
+      height: 1rem;
+      flex-shrink: 0;
+    }
+    @media (min-width: 900px) {
+      .category-pill svg { width: 1.05rem; height: 1.05rem; }
+    }
+    @media (min-width: 1100px) {
+      .category-pill svg { width: 1.15rem; height: 1.15rem; }
+    }
+
+    /* How Collaborations Work — motion timeline */
+    .hiw-section {
+      position: relative;
+      overflow: hidden;
+      background: #050510;
+      color: #fff;
+    }
+    .hiw-section__bg {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 50% 40% at 10% 20%, rgba(238, 62, 150, 0.2) 0%, transparent 55%),
+        radial-gradient(ellipse 45% 35% at 90% 75%, rgba(242, 110, 89, 0.16) 0%, transparent 50%),
+        radial-gradient(ellipse 40% 30% at 50% 50%, rgba(124, 58, 237, 0.12) 0%, transparent 55%);
+    }
+    .hiw-section__orb {
+      position: absolute;
+      border-radius: 9999px;
+      filter: blur(70px);
+      opacity: 0.55;
+      animation: hiw-orb-drift 14s ease-in-out infinite;
+    }
+    .hiw-section__orb--1 {
+      width: 280px;
+      height: 280px;
+      top: 8%;
+      left: -4%;
+      background: rgba(238, 62, 150, 0.35);
+    }
+    .hiw-section__orb--2 {
+      width: 220px;
+      height: 220px;
+      bottom: 12%;
+      right: -2%;
+      background: rgba(242, 110, 89, 0.3);
+      animation-delay: -5s;
+    }
+    @keyframes hiw-orb-drift {
+      0%, 100% { transform: translate(0, 0) scale(1); }
+      50% { transform: translate(18px, -22px) scale(1.08); }
+    }
+    .hiw-header {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+      max-width: 40rem;
+      margin: 0 auto 2rem;
+    }
+    .hiw-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0.75rem;
+      margin-bottom: 0.75rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(238, 62, 150, 0.45);
+      background: rgba(238, 62, 150, 0.1);
+      color: #ff8ec4;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .hiw-eyebrow::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 9999px;
+      background: #f26e59;
+      box-shadow: 0 0 12px #f26e59;
+      animation: hiw-pulse 2s ease-in-out infinite;
+    }
+    @keyframes hiw-pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+    .hiw-title {
+      font-size: clamp(1.65rem, 3.5vw, 2.25rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 0.6rem;
+    }
+    .hiw-title span {
+      background: linear-gradient(90deg, #fff 0%, #ff8ec4 45%, #f26e59 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .hiw-subtitle {
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 0.875rem;
+      line-height: 1.55;
+      margin-bottom: 1rem;
+    }
+    .hiw-phases {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.35rem 0.5rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.45);
+    }
+    .hiw-phases__item {
+      padding: 0.28rem 0.65rem;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      animation: hiw-phase-glow 4s ease-in-out infinite;
+    }
+    .hiw-phases__item:nth-child(1) { animation-delay: 0s; }
+    .hiw-phases__item:nth-child(2) { animation-delay: 0.6s; }
+    .hiw-phases__item:nth-child(3) { animation-delay: 1.2s; }
+    .hiw-phases__item:nth-child(4) { animation-delay: 1.8s; }
+    .hiw-phases__item:nth-child(5) { animation-delay: 2.4s; }
+    @keyframes hiw-phase-glow {
+      0%, 100% { border-color: rgba(255, 255, 255, 0.08); color: rgba(255, 255, 255, 0.45); }
+      50% { border-color: rgba(242, 110, 89, 0.5); color: #fff; box-shadow: 0 0 20px rgba(242, 110, 89, 0.25); }
+    }
+    .hiw-timeline {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+    @media (min-width: 1024px) {
+      .hiw-timeline { gap: 2.5rem; }
+      .hiw-timeline::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        transform: translateX(-50%);
+        background: linear-gradient(180deg, transparent, #ee3e96 8%, #f26e59 50%, #7c3aed 92%, transparent);
+        opacity: 0.45;
+      }
+    }
+    .hiw-step {
+      display: grid;
+      gap: 1.25rem;
+      align-items: center;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1), transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .hiw-step.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    @media (min-width: 1024px) {
+      .hiw-step {
+        grid-template-columns: 1fr 1fr;
+        gap: 1.75rem;
+      }
+      .hiw-step--reverse .hiw-step__visual { order: 2; }
+      .hiw-step--reverse .hiw-step__content { order: 1; text-align: right; }
+      .hiw-step--reverse .hiw-step__content .hiw-step__num { margin-left: auto; margin-right: 0; }
+    }
+    .hiw-step__num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.1rem;
+      height: 2.1rem;
+      margin-bottom: 0.5rem;
+      border-radius: 9999px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #ee3e96, #f26e59);
+      box-shadow: 0 0 0 4px rgba(238, 62, 150, 0.15), 0 8px 24px rgba(242, 110, 89, 0.35);
+    }
+    @media (min-width: 1024px) {
+      .hiw-step__num {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 2;
+        margin: 0;
+      }
+      .hiw-step { position: relative; }
+    }
+    .hiw-step__content h3 {
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.02em;
+    }
+    .hiw-step__content p {
+      color: rgba(255, 255, 255, 0.55);
+      line-height: 1.5;
+      font-size: 0.8rem;
+      max-width: 22rem;
+    }
+    .hiw-step--reverse .hiw-step__content p { margin-left: auto; }
+    .hiw-step__visual {
+      position: relative;
+      aspect-ratio: 4 / 3;
+      max-width: 200px;
+      margin: 0 auto;
+      width: 100%;
+      border-radius: 1rem;
+      background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+    }
+    @media (min-width: 1024px) {
+      .hiw-step__visual { max-width: 220px; }
+    }
+    .hiw-step__visual::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(238, 62, 150, 0.12) 0%, transparent 50%, rgba(124, 58, 237, 0.1) 100%);
+      pointer-events: none;
+    }
+    .hiw-scene {
+      position: absolute;
+      inset: 12%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Scene 1 — Discover */
+    .hiw-scene--discover { display: block; }
+    .hiw-discover-ring {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      translate: -50% -50%;
+      border-radius: 9999px;
+      border: 1px solid rgba(238, 62, 150, 0.35);
+      animation: hiw-ring-expand 3s ease-out infinite;
+    }
+    .hiw-discover-ring:nth-child(1) { width: 40%; height: 40%; animation-delay: 0s; }
+    .hiw-discover-ring:nth-child(2) { width: 65%; height: 65%; animation-delay: 1s; }
+    .hiw-discover-ring:nth-child(3) { width: 90%; height: 90%; animation-delay: 2s; }
+    @keyframes hiw-ring-expand {
+      0% { opacity: 0.8; transform: scale(0.85); }
+      100% { opacity: 0; transform: scale(1.15); }
+    }
+    .hiw-avatar {
+      position: absolute;
+      width: 1.85rem;
+      height: 1.85rem;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, #ee3e96, #7c3aed);
+      border: 2px solid rgba(255, 255, 255, 0.5);
+      animation: hiw-avatar-pop 2.4s ease-in-out infinite;
+    }
+    .hiw-avatar--a { top: 32%; left: 22%; animation-delay: 0s; }
+    .hiw-avatar--b { top: 28%; right: 20%; background: linear-gradient(135deg, #f26e59, #ee3e96); animation-delay: 0.4s; }
+    .hiw-avatar--c { bottom: 26%; left: 42%; background: linear-gradient(135deg, #7c3aed, #f26e59); animation-delay: 0.8s; }
+    @keyframes hiw-avatar-pop {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    /* Scene 2 — Chat */
+    .hiw-scene--chat { flex-direction: column; gap: 0.55rem; align-items: stretch; justify-content: center; padding: 0 4%; }
+    .hiw-bubble {
+      padding: 0.55rem 0.75rem;
+      border-radius: 0.85rem;
+      font-size: 0.6rem;
+      font-weight: 600;
+      max-width: 78%;
+      animation: hiw-bubble-in 2.8s ease-in-out infinite;
+    }
+    .hiw-bubble--brand {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.12);
+      color: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+    .hiw-bubble--creator {
+      align-self: flex-end;
+      background: linear-gradient(90deg, #ee3e96, #f26e59);
+      color: #fff;
+      animation-delay: 0.5s;
+    }
+    .hiw-typing {
+      display: flex;
+      gap: 3px;
+      align-self: flex-start;
+      padding: 0.5rem 0.65rem;
+      border-radius: 0.75rem;
+      background: rgba(255, 255, 255, 0.08);
+      animation: hiw-bubble-in 2.8s ease-in-out infinite;
+      animation-delay: 1s;
+    }
+    .hiw-typing span {
+      width: 5px;
+      height: 5px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.5);
+      animation: hiw-dot 1.2s ease-in-out infinite;
+    }
+    .hiw-typing span:nth-child(2) { animation-delay: 0.15s; }
+    .hiw-typing span:nth-child(3) { animation-delay: 0.3s; }
+    @keyframes hiw-bubble-in {
+      0%, 100% { opacity: 0.4; transform: translateY(6px); }
+      20%, 80% { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes hiw-dot {
+      0%, 100% { opacity: 0.3; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(-3px); }
+    }
+    /* Scene 3 — Contract */
+    .hiw-scene--contract { flex-direction: column; gap: 0.65rem; }
+    .hiw-doc {
+      width: 55%;
+      height: 58%;
+      border-radius: 0.5rem;
+      background: rgba(255, 255, 255, 0.95);
+      padding: 0.65rem;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+      animation: hiw-doc-float 3s ease-in-out infinite;
+    }
+    .hiw-doc__line {
+      height: 4px;
+      border-radius: 2px;
+      background: #e5e7eb;
+      margin-bottom: 0.35rem;
+    }
+    .hiw-doc__line--short { width: 60%; }
+    .hiw-doc__line--accent {
+      width: 80%;
+      background: linear-gradient(90deg, #ee3e96, #f26e59);
+      animation: hiw-line-grow 2s ease-in-out infinite;
+    }
+    @keyframes hiw-doc-float {
+      0%, 100% { transform: translateY(0) rotate(-2deg); }
+      50% { transform: translateY(-6px) rotate(1deg); }
+    }
+    @keyframes hiw-line-grow {
+      0%, 100% { transform: scaleX(0.3); transform-origin: left; }
+      50% { transform: scaleX(1); }
+    }
+    .hiw-check {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 9999px;
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 800;
+      animation: hiw-check-pop 2s ease-in-out infinite;
+    }
+    @keyframes hiw-check-pop {
+      0%, 100% { transform: scale(0.9); opacity: 0.7; }
+      50% { transform: scale(1.1); opacity: 1; box-shadow: 0 0 20px rgba(34, 197, 94, 0.5); }
+    }
+    /* Scene 4 — Track */
+    .hiw-scene--track { flex-direction: column; gap: 0.75rem; width: 70%; }
+    .hiw-track-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+    }
+    .hiw-track-label { font-size: 0.55rem; color: rgba(255, 255, 255, 0.5); width: 3.5rem; flex-shrink: 0; }
+    .hiw-track-bar {
+      flex: 1;
+      height: 6px;
+      border-radius: 9999px;
+      background: rgba(255, 255, 255, 0.1);
+      overflow: hidden;
+    }
+    .hiw-track-fill {
+      height: 100%;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #ee3e96, #f26e59);
+      animation: hiw-bar-fill 2.5s ease-in-out infinite;
+    }
+    .hiw-track-row:nth-child(2) .hiw-track-fill { animation-delay: 0.3s; width: 75%; }
+    .hiw-track-row:nth-child(3) .hiw-track-fill { animation-delay: 0.6s; width: 90%; }
+    .hiw-track-row:nth-child(1) .hiw-track-fill { width: 55%; }
+    @keyframes hiw-bar-fill {
+      0%, 100% { transform: scaleX(0.2); transform-origin: left; opacity: 0.5; }
+      50% { transform: scaleX(1); opacity: 1; }
+    }
+    /* Scene 5 — Grow */
+    .hiw-scene--grow { align-items: flex-end; gap: 0.4rem; height: 55%; width: 65%; }
+    .hiw-bar-col {
+      flex: 1;
+      border-radius: 0.35rem 0.35rem 0 0;
+      background: linear-gradient(180deg, #f26e59, #ee3e96);
+      transform-origin: bottom;
+      animation: hiw-col-rise 2.2s ease-in-out infinite;
+    }
+    .hiw-bar-col:nth-child(1) { height: 45%; animation-delay: 0s; }
+    .hiw-bar-col:nth-child(2) { height: 65%; animation-delay: 0.2s; }
+    .hiw-bar-col:nth-child(3) { height: 85%; animation-delay: 0.4s; }
+    .hiw-bar-col:nth-child(4) { height: 100%; animation-delay: 0.6s; }
+    @keyframes hiw-col-rise {
+      0%, 100% { transform: scaleY(0.55); opacity: 0.6; }
+      50% { transform: scaleY(1); opacity: 1; }
+    }
+    .hiw-grow-arrow {
+      position: absolute;
+      top: 18%;
+      right: 22%;
+      font-size: 1.25rem;
+      color: #f26e59;
+      animation: hiw-arrow-bounce 1.8s ease-in-out infinite;
+    }
+    @keyframes hiw-arrow-bounce {
+      0%, 100% { transform: translateY(0); opacity: 0.6; }
+      50% { transform: translateY(-8px); opacity: 1; }
+    }
+    .hiw-cta-wrap {
+      text-align: center;
+      margin-top: 2rem;
+      opacity: 0;
+      transform: translateY(24px);
+      transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .hiw-cta-wrap.is-visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    .hiw-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.5rem;
+      border-radius: 9999px;
+      background: linear-gradient(90deg, #ee3e96, #f26e59);
+      font-weight: 700;
+      font-size: 0.85rem;
+      box-shadow: 0 8px 28px rgba(238, 62, 150, 0.35);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .hiw-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 48px rgba(242, 110, 89, 0.5);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .hiw-section__orb,
+      .hiw-discover-ring,
+      .hiw-avatar,
+      .hiw-bubble,
+      .hiw-typing,
+      .hiw-doc,
+      .hiw-check,
+      .hiw-track-fill,
+      .hiw-bar-col,
+      .hiw-grow-arrow,
+      .hiw-phases__item,
+      .hiw-eyebrow::before {
+        animation: none !important;
+      }
+      .hiw-step,
+      .hiw-cta-wrap {
+        opacity: 1;
+        transform: none;
+      }
+    }
+
+    /* Trust & Verification section */
+    .verify-section {
+      position: relative;
+      overflow: hidden;
+      padding: 0.5rem 0 0.4rem;
+      background:
+        radial-gradient(ellipse 55% 45% at 8% 20%, rgba(238, 62, 150, 0.18) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 92% 25%, rgba(99, 102, 241, 0.2) 0%, transparent 55%),
+        linear-gradient(180deg, #050510 0%, #0a0818 50%, #050510 100%);
+      color: #fff;
+    }
+    @media (min-width: 1024px) {
+      .verify-section { padding: 0.65rem 0 0.5rem; }
+    }
+    .verify-header {
+      text-align: center;
+      margin-bottom: 0.12rem;
+    }
+    @media (min-width: 1024px) {
+      .verify-header { margin-bottom: 0.15rem; }
+    }
+    .verify-section__dots {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 1px);
+      background-size: 22px 22px;
+      mask-image: linear-gradient(90deg, black 0%, transparent 18%, transparent 82%, black 100%);
+    }
+    .verify-section__inner { position: relative; z-index: 1; }
+    .verify-body {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      width: 100%;
+      max-width: 54rem;
+      margin: 0 auto;
+    }
+    .verify-includes-row {
+      display: grid;
+      gap: 0.4rem;
+      grid-template-columns: 1fr;
+      width: 100%;
+      max-width: 300px;
+      margin: -1.1rem auto 0.22rem;
+    }
+    @media (min-width: 640px) {
+      .verify-includes-row {
+        max-width: 100%;
+        grid-template-columns: repeat(2, minmax(0, 260px));
+        justify-content: center;
+        column-gap: 0.75rem;
+        margin-top: -1.25rem;
+      }
+    }
+    @media (min-width: 1024px) {
+      .verify-includes-row {
+        grid-template-columns: minmax(0, 300px) minmax(80px, 100px) minmax(0, 300px);
+        column-gap: 1rem;
+        margin-top: -1.65rem;
+        margin-bottom: 0.28rem;
+        width: fit-content;
+        max-width: 100%;
+      }
+      .verify-includes-row .verify-includes--creator { grid-column: 1; }
+      .verify-includes-row .verify-includes--business { grid-column: 3; }
+    }
+    .verify-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      margin-bottom: 0.1rem;
+      padding: 0.28rem 0.7rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(238, 62, 150, 0.45);
+      background: rgba(238, 62, 150, 0.08);
+      color: #ee3e96;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .verify-title {
+      font-size: clamp(1.5rem, 3.2vw, 2.5rem);
+      font-weight: 800;
+      line-height: 1.06;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.05rem;
+    }
+    .verify-title .text-creators {
+      background: linear-gradient(90deg, #ff2e88, #ee3e96);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .verify-title .text-businesses {
+      background: linear-gradient(90deg, #7c8cff, #6366f1);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+    .verify-subtitle {
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 0.95rem;
+      line-height: 1.15;
+      max-width: 30rem;
+      margin: 0 auto;
+    }
+    .verify-profiles {
+      display: grid;
+      gap: 0;
+      align-items: end;
+      justify-items: center;
+      margin-bottom: 0;
+    }
+    @media (min-width: 1024px) {
+      .verify-profiles {
+        grid-template-columns: repeat(3, max-content);
+        justify-content: center;
+        column-gap: 1rem;
+        row-gap: 0;
+        align-items: end;
+        margin-bottom: 0;
+        width: fit-content;
+        max-width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
+    .verify-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      width: 100%;
+      max-width: 280px;
+    }
+    @media (min-width: 1024px) {
+      .verify-col:not(.verify-col--center) {
+        width: 300px;
+        max-width: 300px;
+      }
+    }
+    .verify-col--center {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem 0.5rem;
+      text-align: center;
+      order: -1;
+      margin-bottom: 0;
+      max-width: none;
+      width: auto;
+    }
+    @media (min-width: 1024px) {
+      .verify-col--center {
+        flex-direction: column;
+        order: 0;
+        align-self: center;
+        justify-content: center;
+        gap: 0.1rem;
+        margin-bottom: 0;
+      }
+    }
+    .verify-photo-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 280px;
+      margin: 0 auto;
+    }
+    @media (min-width: 1024px) {
+      .verify-photo-wrap {
+        width: 300px;
+        max-width: 300px;
+      }
+    }
+    .verify-photo {
+      position: relative;
+      border-radius: 0;
+      overflow: visible;
+      background: transparent;
+      border: none;
+      width: 100%;
+      min-height: 240px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    @media (min-width: 1024px) {
+      .verify-photo { min-height: 280px; }
+    }
+    .verify-photo img {
+      width: 100%;
+      height: 240px;
+      max-height: 240px;
+      display: block;
+      object-fit: contain;
+      object-position: center bottom;
+      margin: 0 auto;
+    }
+    @media (min-width: 640px) {
+      .verify-photo img { height: 260px; max-height: 260px; }
+      .verify-photo { min-height: 260px; }
+    }
+    @media (min-width: 1024px) {
+      .verify-photo img { height: 280px; max-height: 280px; }
+      .verify-photo { min-height: 280px; }
+    }
+    .verify-photo--creator img {
+      filter: drop-shadow(0 0 24px rgba(238, 62, 150, 0.45)) drop-shadow(0 0 48px rgba(238, 62, 150, 0.2));
+    }
+    .verify-photo--business img {
+      filter: drop-shadow(0 0 24px rgba(99, 102, 241, 0.45)) drop-shadow(0 0 48px rgba(99, 102, 241, 0.2));
+    }
+    .verify-includes {
+      display: flex;
+      gap: 0.65rem;
+      align-items: flex-start;
+      width: 100%;
+      max-width: none;
+      min-height: 5.5rem;
+      margin: 0;
+      padding: 0.38rem 0.75rem;
+      border-radius: 0.75rem;
+      position: relative;
+      z-index: 2;
+      background: rgba(12, 12, 24, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-sizing: border-box;
+    }
+    .verify-includes--creator {
+      box-shadow: 0 0 30px rgba(238, 62, 150, 0.12);
+      border-color: rgba(238, 62, 150, 0.25);
+    }
+    .verify-includes--business {
+      box-shadow: 0 0 30px rgba(99, 102, 241, 0.12);
+      border-color: rgba(99, 102, 241, 0.25);
+    }
+    .verify-includes h5 {
+      font-size: 0.88rem;
+      font-weight: 700;
+      margin-bottom: 0.18rem;
+      line-height: 1.2;
+    }
+    .verify-includes--creator h5 { color: #ff6eb4; }
+    .verify-includes--business h5 { color: #93a4ff; }
+    .verify-includes ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      flex: 1;
+    }
+    .verify-includes li {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.4rem;
+      font-size: 0.78rem;
+      line-height: 1.3;
+      color: rgba(255, 255, 255, 0.65);
+      margin-bottom: 0.14rem;
+    }
+    .verify-includes li:last-child { margin-bottom: 0; }
+    .verify-includes li::before {
+      content: "✓";
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+    .verify-includes--creator li::before { color: #ee3e96; }
+    .verify-includes--business li::before { color: #6366f1; }
+    .verify-includes__icon {
+      flex-shrink: 0;
+      width: 2.1rem;
+      height: 2.1rem;
+      border-radius: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .verify-includes__icon svg {
+      width: 18px;
+      height: 18px;
+    }
+    .verify-includes--creator .verify-includes__icon {
+      background: rgba(238, 62, 150, 0.15);
+      color: #ee3e96;
+      box-shadow: 0 0 20px rgba(238, 62, 150, 0.35);
+    }
+    .verify-includes--business .verify-includes__icon {
+      background: rgba(99, 102, 241, 0.15);
+      color: #818cf8;
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.35);
+    }
+    .verify-shield-hero {
+      position: relative;
+      width: 5rem;
+      height: 5rem;
+      margin: 0;
+      flex-shrink: 0;
+    }
+    @media (min-width: 1024px) {
+      .verify-shield-hero {
+        width: 5.75rem;
+        height: 5.75rem;
+        margin: 0 auto;
+        align-self: center;
+      }
+    }
+    .verify-shield-hero__ring {
+      position: absolute;
+      inset: -15%;
+      border-radius: 50%;
+      border: 1px solid rgba(238, 62, 150, 0.2);
+      animation: verifyPulse 4s ease-in-out infinite;
+    }
+    .verify-shield-hero__ring:nth-child(2) {
+      inset: -28%;
+      border-color: rgba(99, 102, 241, 0.15);
+      animation-delay: 1s;
+    }
+    .verify-shield-hero__core {
+      position: absolute;
+      inset: 8%;
+      border-radius: 0.85rem;
+      background: linear-gradient(145deg, rgba(238, 62, 150, 0.35), rgba(99, 102, 241, 0.35));
+      box-shadow: 0 0 36px rgba(238, 62, 150, 0.4), 0 0 48px rgba(99, 102, 241, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .verify-shield-hero__core svg { width: 55%; height: 55%; color: #fff; filter: drop-shadow(0 0 12px rgba(255,255,255,0.5)); }
+    @keyframes verifyPulse {
+      0%, 100% { transform: scale(1); opacity: 0.6; }
+      50% { transform: scale(1.05); opacity: 1; }
+    }
+    .verify-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: auto;
+      max-width: none;
+      flex: 1 1 10rem;
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.8rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    @media (min-width: 1024px) {
+      .verify-divider {
+        width: 100%;
+        max-width: 13rem;
+        flex: none;
+      }
+    }
+    .verify-divider::before,
+    .verify-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent);
+    }
+    .verify-process {
+      display: grid;
+      gap: 0.35rem 0.5rem;
+      grid-template-columns: 1fr;
+      padding-top: 0.32rem;
+      margin-top: 0;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      width: 100%;
+      max-width: 48rem;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    @media (min-width: 640px) {
+      .verify-process {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.4rem 0.6rem;
+        max-width: 38rem;
+      }
+    }
+    @media (min-width: 1024px) {
+      .verify-process {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 0.35rem 0.9rem;
+        padding-top: 0.35rem;
+        max-width: 50rem;
+      }
+    }
+    .verify-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.28rem;
+      text-align: center;
+      max-width: 10.5rem;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0.1rem 0.2rem;
+    }
+    @media (min-width: 1024px) {
+      .verify-step {
+        max-width: none;
+        margin: 0;
+        padding: 0.1rem 0.25rem;
+      }
+    }
+    .verify-step__icon {
+      width: 2.5rem;
+      height: 2.5rem;
+      margin: 0;
+      flex-shrink: 0;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 0 24px rgba(238, 62, 150, 0.25);
+    }
+    .verify-step:nth-child(1) .verify-step__icon {
+      background: linear-gradient(135deg, rgba(238, 62, 150, 0.35), rgba(238, 62, 150, 0.1));
+      color: #ff6eb4;
+    }
+    .verify-step:nth-child(2) .verify-step__icon,
+    .verify-step:nth-child(3) .verify-step__icon {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.35), rgba(124, 58, 237, 0.1));
+      color: #c4b5fd;
+      box-shadow: 0 0 24px rgba(124, 58, 237, 0.25);
+    }
+    .verify-step:nth-child(4) .verify-step__icon {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.35), rgba(99, 102, 241, 0.1));
+      color: #93a4ff;
+      box-shadow: 0 0 24px rgba(99, 102, 241, 0.25);
+    }
+    .verify-step__body { min-width: 0; width: 100%; }
+    .verify-step h4 { font-size: 0.85rem; font-weight: 700; margin-bottom: 0.1rem; line-height: 1.15; }
+    .verify-step p {
+      font-size: 0.72rem;
+      color: rgba(255,255,255,0.45);
+      line-height: 1.28;
+      margin: 0;
+      max-width: 9.25rem;
+    }
+    @media (min-width: 1024px) {
+      .verify-step p { max-width: 10rem; margin: 0 auto; }
+    }
+    .verify-step__icon svg { width: 17px; height: 17px; }
+
+    .site-footer {
+      background: transparent;
+      overflow: hidden;
+    }
+    .closing-wrap {
+      background: #f9fafb;
+      padding: 2.5rem 0 0;
+    }
+    @media (min-width: 1024px) {
+      .closing-wrap { padding: 3.5rem 0 0; }
+    }
+    .closing-panel {
+      width: 100%;
+      max-width: none;
+      margin: 0;
+      background: linear-gradient(165deg, #1a0a2e 0%, #0f0f23 45%, #12081f 100%);
+      border-radius: 3rem 3rem 0 0;
+      overflow: hidden;
+    }
+    @media (min-width: 768px) {
+      .closing-panel { border-radius: 3.75rem 3.75rem 0 0; }
+    }
+    @media (min-width: 1024px) {
+      .closing-panel { border-radius: 4.5rem 4.5rem 0 0; }
+    }
+    .closing-cta {
+      text-align: center;
+      padding: 3.5rem 1.5rem 2rem;
+    }
+    @media (min-width: 768px) {
+      .closing-cta { padding: 4.5rem 2rem 2.5rem; }
+    }
+    @media (min-width: 1024px) {
+      .closing-cta { padding: 5.5rem 2.5rem 3rem; }
+    }
+    .closing-cta__title {
+      color: #fff;
+      font-weight: 800;
+      font-size: clamp(1.75rem, 4.5vw, 3.25rem);
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      max-width: 52rem;
+      margin: 0 auto 2rem;
+    }
+    .closing-cta__actions {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+    @media (min-width: 640px) {
+      .closing-cta__actions { flex-direction: row; gap: 1rem; }
+    }
+    .closing-cta__btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 12.5rem;
+      padding: 0.85rem 1.75rem;
+      border-radius: 9999px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+    }
+    .closing-cta__btn:hover { transform: translateY(-1px); }
+    .closing-cta__btn--primary {
+      background: #fff;
+      color: #050510;
+    }
+    .closing-cta__btn--primary:hover { background: #f3f4f6; }
+    .closing-cta__btn--secondary {
+      border: 2px solid rgba(255, 255, 255, 0.85);
+      color: #fff;
+    }
+    .closing-cta__btn--secondary:hover { background: rgba(255, 255, 255, 0.08); }
+
+    .closing-links {
+      padding: 2.5rem 1.25rem 2rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    @media (min-width: 768px) {
+      .closing-links { padding: 3rem 2rem 2.5rem; }
+    }
+    .closing-links__inner {
+      max-width: 80rem;
+      margin: 0 auto;
+    }
+    .closing-links__grid {
+      display: grid;
+      gap: 2rem 2.5rem;
+      grid-template-columns: 1fr;
+    }
+    @media (min-width: 640px) {
+      .closing-links__grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (min-width: 1024px) {
+      .closing-links__grid {
+        grid-template-columns: minmax(220px, 1.35fr) repeat(4, 1fr);
+        gap: 2rem 2rem;
+      }
+    }
+    .closing-links__brand img {
+      height: 2rem;
+      width: auto;
+      margin-bottom: 1rem;
+    }
+    .closing-links__brand p {
+      font-size: 0.875rem;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.55);
+      max-width: 18rem;
+      margin-bottom: 1.25rem;
+    }
+    .closing-links__social {
+      display: flex;
+      gap: 0.5rem;
+    }
+    .closing-links__social a {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 2.25rem;
+      height: 2.25rem;
+      border-radius: 0.5rem;
+      background: rgba(255, 255, 255, 0.08);
+      color: rgba(255, 255, 255, 0.75);
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+    .closing-links__social a:hover {
+      background: rgba(255, 255, 255, 0.14);
+      color: #fff;
+    }
+    .closing-links__social svg {
+      width: 1.1rem;
+      height: 1.1rem;
+    }
+    .closing-links__heading {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #fff;
+      margin-bottom: 1rem;
+    }
+    .closing-links__list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+    .closing-links__list a {
+      font-size: 0.875rem;
+      color: rgba(255, 255, 255, 0.52);
+      transition: color 0.2s ease;
+    }
+    .closing-links__list a:hover { color: #fff; }
+
+    .site-footer__watermark {
+      display: block;
+      text-align: center;
+      font-size: clamp(3.5rem, 16vw, 11rem);
+      font-weight: 800;
+      line-height: 0.95;
+      letter-spacing: -0.03em;
+      padding: 1rem 1rem 1.5rem;
+      user-select: none;
+      pointer-events: none;
+      color: rgba(255, 255, 255, 0.2);
+      text-shadow: 0 0 80px rgba(238, 62, 150, 0.15);
+    }
+    @media (min-width: 1024px) {
+      .site-footer__watermark { padding: 1.5rem 1rem 2rem; }
+    }
+    .site-footer__bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem 1.5rem;
+      padding: 1.25rem 1.25rem 1.5rem;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.55);
+    }
+    @media (min-width: 640px) {
+      .site-footer__bar { padding: 1.25rem 2rem 1.75rem; font-size: 0.8125rem; }
+    }
+    .site-footer__bar a {
+      color: inherit;
+      transition: color 0.2s ease;
+    }
+    .site-footer__bar a:hover { color: rgba(255, 255, 255, 0.85); }
+    .site-footer__links {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.35rem 1.25rem;
+    }
+  </style>
+</head>
+<body class="font-sans bg-brand-dark text-white antialiased">
+
+  <!-- Navigation -->
+  <header class="fixed top-0 inset-x-0 z-50 pt-3 px-3 sm:px-5">
+    <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 rounded-xl bg-brand-dark/70 backdrop-blur-md border border-white/15 shadow-lg shadow-black/30">
+      <a href="./index.html" class="flex items-center gap-2 shrink-0">
+        <img src="./Asset/Influnet-LOGO/Logo.png" alt="Influnet" class="h-8 sm:h-10">
+      </a>
+      <div class="hidden lg:flex items-center gap-8 text-sm text-gray-300">
+        <a href="#platform" class="hover:text-white transition">For Businesses</a>
+        <a href="#categories" class="hover:text-white transition">For Influencers</a>
+        <a href="#how-it-works" class="hover:text-white transition">How It Works</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="./login.html" data-influnet-app="/login" class="hidden sm:inline-flex px-5 py-2 rounded-full border border-white/20 text-sm hover:bg-white/5 transition">Log In</a>
+        <button id="menu-btn" class="lg:hidden p-2 rounded-lg hover:bg-white/10" aria-label="Open menu">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
+      </div>
+    </nav>
+    <div id="mobile-menu" class="hidden lg:hidden max-w-7xl mx-auto mt-2 rounded-xl border border-white/10 bg-brand-dark/95 px-4 py-4 space-y-3">
+      <a href="#platform" class="block py-2 text-gray-300 hover:text-white">For Businesses</a>
+      <a href="#categories" class="block py-2 text-gray-300 hover:text-white">For Influencers</a>
+      <a href="#how-it-works" class="block py-2 text-gray-300 hover:text-white">How It Works</a>
+      <a href="./login.html" data-influnet-app="/login" class="block w-full mt-2 px-5 py-2 rounded-full border border-white/20 text-sm text-center">Log In</a>
+    </div>
+  </header>
+
+  <main>
+  <!-- Landing Page (Hero) -->
+  <section id="page-1" class="relative pt-24 lg:pt-26 pb-12 lg:pb-14 overflow-hidden hero-wave lg:min-h-[82vh]">
+    <div class="absolute inset-0 pointer-events-none">
+      <div class="absolute top-20 right-0 w-96 h-96 bg-brand-pink/10 rounded-full blur-3xl"></div>
+      <div class="absolute bottom-0 left-0 w-80 h-80 bg-brand-purple/10 rounded-full blur-3xl"></div>
+    </div>
+    <div class="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-8 relative">
+      <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <div class="lg:pr-6">
+          <p class="inline-flex items-center rounded-full border border-brand-pink/35 bg-brand-pink/10 px-3 py-1 text-[11px] sm:text-xs font-semibold tracking-widest uppercase text-brand-pink mb-5">Welcome To Influnet</p>
+          <h1 class="text-[34px] sm:text-5xl lg:text-[56px] font-extrabold leading-[1.03] mb-5">
+            Where Influence<br>
+            Meets<br>
+            <span class="text-gradient-opportunity">Opportunity</span>
+          </h1>
+          <p class="text-gray-400 text-base sm:text-lg leading-relaxed max-w-xl mb-8">
+            Influnet connects visionary brands with authentic influencers to create impactful collaborations and measurable growth.
+          </p>
+          <div class="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <a href="./discover.html" class="premium-btn inline-flex items-center gap-2 justify-center px-8 py-3.5 rounded-2xl text-white font-semibold text-lg sm:text-xl leading-none transition duration-300 hover:-translate-y-0.5">
+              <span class="text-lg">✦</span><span class="tracking-wide">Collaborate</span>
+            </a>
+          </div>
+        </div>
+        <div class="relative">
+          <div class="bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-xl border border-white/15 rounded-3xl p-6 sm:p-7 shadow-2xl shadow-brand-pink/20">
+            <h2 class="text-4xl font-bold mb-1">Welcome Back</h2>
+            <p class="text-gray-300 text-sm mb-5">Sign in to your Influnet account</p>
+            <form class="space-y-4" data-influnet-app-form="/login">
+              <div>
+                <label class="text-[11px] uppercase tracking-widest text-gray-400 font-semibold">Email Address</label>
+                <input type="email" placeholder="Enter your email" class="mt-1 w-full px-4 py-3 rounded-xl bg-black/35 border border-white/10 text-sm placeholder-gray-500 focus:outline-none focus:border-brand-pink/50">
+              </div>
+              <div>
+                <label class="text-[11px] uppercase tracking-widest text-gray-400 font-semibold">Password</label>
+                <input type="password" placeholder="Enter your password" class="mt-1 w-full px-4 py-3 rounded-xl bg-black/35 border border-white/10 text-sm placeholder-gray-500 focus:outline-none focus:border-brand-pink/50">
+              </div>
+              <button type="submit" class="w-full py-3 rounded-xl bg-gradient-to-r from-[#ee3e96] to-[#f26e59] font-semibold text-sm hover:opacity-90 transition shadow-lg shadow-[#ee3e96]/25">Log In →</button>
+            </form>
+            <p class="mt-4 text-[11px] text-gray-400 text-center">
+              <a href="./signup.html" data-influnet-app="/signup" class="hover:text-white transition underline-offset-2 hover:underline">NOT REGISTERED YET? SIGN UP</a>
+            </p>
+            <div class="mt-3 grid grid-cols-2 gap-3">
+              <a href="./signup-business.html" data-influnet-app="/signup/business" class="py-3 rounded-xl border border-white/15 bg-black/35 text-xs font-medium hover:bg-white/5 transition text-center inline-block">SIGNUP AS<br>BUSINESS OWNER</a>
+              <a href="./signup-influencer.html" data-influnet-app="/signup/influencer" class="py-3 rounded-xl border border-white/15 bg-black/35 text-xs font-medium hover:bg-white/5 transition text-center inline-block">SIGNUP AS<br>INFLUENCER</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Smart Match + Connect (combined showcase) -->
+  <section id="platform" class="influ-showcase-cycle py-10 lg:py-14 bg-white text-gray-900 lg:min-h-[86vh] lg:flex lg:items-center">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+      <div class="influ-showcase-steps max-w-xs" aria-hidden="true">
+        <div class="influ-showcase-step influ-showcase-step--match"><span></span></div>
+        <div class="influ-showcase-step influ-showcase-step--connect"><span></span></div>
+      </div>
+      <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+        <!-- Content (alternates) -->
+        <div class="influ-showcase-stack">
+          <div class="influ-showcase-panel influ-showcase-panel--match">
+            <p class="text-[#ee3e96] text-[11px] font-bold tracking-widest uppercase mb-2">Smart Match Engine</p>
+            <h2 class="text-xl sm:text-2xl font-extrabold mb-4 leading-tight">Discover Collaborators That Fit Your Brand</h2>
+            <ul class="space-y-4">
+              <li class="flex gap-4">
+                <span class="shrink-0 w-8 h-8 rounded-lg bg-[#ee3e96]/10 flex items-center justify-center text-[#ee3e96]">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </span>
+                <div>
+                  <h4 class="font-bold text-base mb-1">Discovery</h4>
+                  <p class="text-gray-500 text-sm leading-relaxed">Search by niche, industry, audience, location, and engagement to find the perfect match.</p>
+                </div>
+              </li>
+              <li class="flex gap-4">
+                <span class="shrink-0 w-8 h-8 rounded-lg bg-brand-purple/10 flex items-center justify-center text-brand-purple">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                </span>
+                <div>
+                  <h4 class="font-bold text-base mb-1">Verification <span class="inline-flex items-center px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-medium ml-1">Verified Creator Profiles</span></h4>
+                  <p class="text-gray-500 text-sm leading-relaxed">Every creator is vetted with social platform verification and audience review.</p>
+                </div>
+              </li>
+              <li class="flex gap-4">
+                <span class="shrink-0 w-8 h-8 rounded-lg bg-[#f26e59]/10 flex items-center justify-center text-[#f26e59]">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </span>
+                <div>
+                  <h4 class="font-bold text-base mb-1">Speed</h4>
+                  <p class="text-gray-500 text-sm leading-relaxed">Book collaborations in minutes and match instantly with our intelligent engine.</p>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="influ-showcase-panel influ-showcase-panel--connect">
+            <p class="text-brand-purple text-[11px] font-semibold tracking-widest uppercase mb-2">Book Collaborations In Minutes</p>
+            <h3 class="text-2xl font-extrabold mb-4">Connect with creators</h3>
+            <p class="text-gray-600 text-sm leading-relaxed mb-5">Directly send collaboration requests without long back-and-forth conversations.</p>
+            <ul class="space-y-4 text-gray-700">
+              <li class="flex items-center gap-3"><span class="text-brand-purple">✓</span>Send collaboration invitations</li>
+              <li class="flex items-center gap-3"><span class="text-brand-purple">✓</span>Chat directly with creators</li>
+              <li class="flex items-center gap-3"><span class="text-brand-purple">✓</span>Track request status</li>
+              <li class="flex items-center gap-3"><span class="text-brand-purple">✓</span>Manage all conversations in one place</li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Demos (alternates) -->
+        <div class="influ-showcase-stack influ-showcase-stack--demo">
+          <div class="influ-demo influ-demo--match">
+            <div class="influ-demo-card">
+              <div class="influ-demo-gradient p-4 sm:p-5">
+                <p class="text-sm font-semibold mb-3">Search Collaborators</p>
+                <div class="grid grid-cols-2 gap-2 mb-2">
+                  <div>
+                    <p class="influ-demo-label">Category</p>
+                    <div class="influ-demo-field">Fashion <span class="text-gray-400">▾</span></div>
+                  </div>
+                  <div>
+                    <p class="influ-demo-label">Location</p>
+                    <div class="influ-demo-field">Coimbatore <span class="text-gray-400">▾</span></div>
+                  </div>
+                  <div>
+                    <p class="influ-demo-label">Followers</p>
+                    <div class="influ-demo-field">10K – 100K <span class="text-gray-400">▾</span></div>
+                  </div>
+                  <div>
+                    <p class="influ-demo-label">Engagement Rate</p>
+                    <div class="influ-demo-field">58% <span class="text-gray-400">▾</span></div>
+                  </div>
+                </div>
+                <div class="mb-1">
+                  <p class="influ-demo-label">Budget Range</p>
+                  <div class="influ-demo-field">₹10K – ₹50K <span class="text-gray-400">▾</span></div>
+                </div>
+                <button type="button" class="influ-demo-btn influ-demo-btn--match">Find Matches</button>
+              </div>
+              <div class="influ-demo-results">
+                <p class="text-[10px] font-semibold uppercase tracking-wider text-gray-400 mb-2">Top Matches</p>
+                <div class="influ-demo-result">
+                  <span>Fashion · Coimbatore · 42K</span>
+                  <span class="influ-demo-badge influ-demo-badge--verified">Verified</span>
+                </div>
+                <div class="influ-demo-result influ-demo-result--extra">
+                  <span>Lifestyle · 58% engagement</span>
+                  <span class="influ-demo-badge influ-demo-badge--verified">Verified</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="influ-demo influ-demo--connect">
+            <div class="influ-demo-card">
+              <div class="px-4 py-3 border-b border-gray-100 flex items-center justify-between">
+                <p class="text-sm font-semibold text-gray-900">Collaboration Request</p>
+                <span class="influ-demo-badge influ-demo-status influ-demo-status-wrap">
+                  <span class="influ-demo-status-pending">Pending</span>
+                  <span class="influ-demo-status-sent">Sent</span>
+                </span>
+              </div>
+              <div class="p-4 space-y-3">
+                <div class="flex items-center gap-3">
+                  <div class="influ-demo-avatar"></div>
+                  <div>
+                    <p class="text-sm font-semibold text-gray-900">Priya Sharma</p>
+                    <p class="text-xs text-gray-500">Fashion · Coimbatore · 42K followers</p>
+                  </div>
+                </div>
+                <div class="rounded-lg bg-[#faf7fb] border border-[#ece7f3] p-3 text-xs text-gray-600 leading-relaxed">
+                  Hi Priya, we'd love to collaborate on our new summer collection launch. Are you open to a paid partnership?
+                </div>
+                <button type="button" class="influ-demo-btn influ-demo-btn--connect">Send Collaboration Invitation</button>
+              </div>
+              <div class="border-t border-gray-100">
+                <div class="influ-demo-row">
+                  <span>Chat directly with creators</span>
+                  <span class="text-brand-purple text-xs font-semibold">Active</span>
+                </div>
+                <div class="influ-demo-row influ-demo-row--new">
+                  <span>Track request status</span>
+                  <span class="influ-demo-badge influ-demo-badge--sent">Sent</span>
+                </div>
+                <div class="influ-demo-row">
+                  <span>Manage all conversations in one place</span>
+                  <span class="text-gray-400 text-xs">Inbox</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="influ-showcase-pointer" aria-hidden="true">
+            <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M2 1v14l5-4 3.5 7.5 2.5-1.5L9.5 8.5H15L2 1z"
+                fill="#FFFFFF"
+                stroke="#111111"
+                stroke-width="1.25"
+                stroke-linejoin="round"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Collaboration Discovery Suite -->
+  <section id="discovery-suite" class="discovery-suite py-16 lg:py-24 flex items-center">
+    <div class="discovery-suite__panel max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16 relative z-[1] w-full">
+      <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start w-full">
+        <div class="discovery-suite__visual">
+          <div class="discovery-suite__media">
+            <div class="discovery-suite__demo">
+              <video
+                src="./Asset/Assetdiscovery-demo.gif"
+                autoplay
+                loop
+                muted
+                playsinline
+                preload="metadata"
+                aria-label="Influnet collaboration discovery demo"
+              ></video>
+            </div>
+            <div class="discovery-suite__card">
+              <p class="discovery-suite__card-title">Share a little about your brand 📣</p>
+              <div class="discovery-suite__card-cycle" aria-live="polite">
+                <div class="discovery-suite__card-step">
+                  <div class="discovery-suite__card-row">
+                    <div>
+                      <span class="discovery-suite__field-label">Brand name*</span>
+                      <span class="discovery-suite__field-value">GlowEssence</span>
+                    </div>
+                    <div>
+                      <span class="discovery-suite__field-label">Brand logo*</span>
+                      <span class="discovery-suite__logo-box" aria-hidden="true"></span>
+                    </div>
+                  </div>
+                  <span class="discovery-suite__field-label">Brand description*</span>
+                  <p class="discovery-suite__field-value discovery-suite__field-value--area">Skincare with clinically proven ingredients.</p>
+                  <span class="discovery-suite__field-label">Brand industry topics*</span>
+                  <div class="discovery-suite__tags">
+                    <span class="discovery-suite__tag">beauty</span>
+                    <span class="discovery-suite__tag">skincare</span>
+                    <span class="discovery-suite__tag">wellness</span>
+                  </div>
+                </div>
+                <div class="discovery-suite__card-step">
+                  <div class="discovery-suite__card-row">
+                    <div>
+                      <span class="discovery-suite__field-label">Brand name*</span>
+                      <span class="discovery-suite__field-value">Urban Threads</span>
+                    </div>
+                    <div>
+                      <span class="discovery-suite__field-label">Brand logo*</span>
+                      <span class="discovery-suite__logo-box" aria-hidden="true"></span>
+                    </div>
+                  </div>
+                  <span class="discovery-suite__field-label">Brand description*</span>
+                  <p class="discovery-suite__field-value discovery-suite__field-value--area">Streetwear label for Gen Z style drops.</p>
+                  <span class="discovery-suite__field-label">Brand industry topics*</span>
+                  <div class="discovery-suite__tags">
+                    <span class="discovery-suite__tag">fashion</span>
+                    <span class="discovery-suite__tag">streetwear</span>
+                    <span class="discovery-suite__tag">lifestyle</span>
+                  </div>
+                </div>
+                <div class="discovery-suite__card-step">
+                  <div class="discovery-suite__card-row">
+                    <div>
+                      <span class="discovery-suite__field-label">Brand name*</span>
+                      <span class="discovery-suite__field-value">FitFuel</span>
+                    </div>
+                    <div>
+                      <span class="discovery-suite__field-label">Brand logo*</span>
+                      <span class="discovery-suite__logo-box" aria-hidden="true"></span>
+                    </div>
+                  </div>
+                  <span class="discovery-suite__field-label">Brand description*</span>
+                  <p class="discovery-suite__field-value discovery-suite__field-value--area">Nutrition brand for active lifestyles.</p>
+                  <span class="discovery-suite__field-label">Brand industry topics*</span>
+                  <div class="discovery-suite__tags">
+                    <span class="discovery-suite__tag">fitness</span>
+                    <span class="discovery-suite__tag">nutrition</span>
+                    <span class="discovery-suite__tag">wellness</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="discovery-suite__content">
+          <h2 class="discovery-suite__headline">
+            Connect with the right <span class="discovery-suite__headline-accent">collaborators faster.</span>
+          </h2>
+          <a href="./discover.html" class="discovery-suite__cta">Discover creators</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust & Verification -->
+  <section id="verification" class="verify-section" aria-labelledby="verify-heading">
+    <div class="verify-section__dots" aria-hidden="true"></div>
+    <div class="verify-section__inner max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="verify-header">
+        <span class="verify-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Trust &amp; Verification
+        </span>
+        <h2 id="verify-heading" class="verify-title">
+          How Are <span class="text-creators">Creators</span> &amp;<br class="hidden sm:block">
+          <span class="text-businesses">Businesses</span> <span class="text-gradient-pink">Verified?</span>
+        </h2>
+        <p class="verify-subtitle px-2">Verified profiles. Trusted collaborations.</p>
+      </div>
+
+      <div class="verify-body">
+      <div class="verify-profiles">
+        <!-- Creator column -->
+        <div class="verify-col">
+          <div class="verify-photo-wrap">
+            <div class="verify-photo verify-photo--creator">
+              <img src="./Asset/verify-creator.png" alt="Verified creator profile — Priya K., Fashion Creator with 125K followers" width="340" height="450" loading="lazy">
+            </div>
+          </div>
+        </div>
+
+        <!-- Center shield -->
+        <div class="verify-col verify-col--center">
+          <div class="verify-shield-hero" aria-hidden="true">
+            <span class="verify-shield-hero__ring"></span>
+            <span class="verify-shield-hero__ring"></span>
+            <div class="verify-shield-hero__core">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+            </div>
+          </div>
+          <p class="verify-divider">How Verification Works</p>
+        </div>
+
+        <!-- Business column -->
+        <div class="verify-col">
+          <div class="verify-photo-wrap">
+            <div class="verify-photo verify-photo--business">
+              <img src="./Asset/verify-business.png" alt="Verified business profile — Urban Threads, Fashion Brand" width="340" height="450" loading="lazy">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="verify-includes-row">
+        <div class="verify-includes verify-includes--creator">
+          <div>
+            <h5>Creator verification</h5>
+            <ul>
+              <li>Social platform check</li>
+              <li>Audience &amp; engagement review</li>
+              <li>Identity confirmation</li>
+            </ul>
+          </div>
+          <div class="verify-includes__icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+        </div>
+        <div class="verify-includes verify-includes--business">
+          <div>
+            <h5>Business verification</h5>
+            <ul>
+              <li>Business profile check</li>
+              <li>GST &amp; registration</li>
+              <li>Platform moderation</li>
+            </ul>
+          </div>
+          <div class="verify-includes__icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="verify-process">
+        <div class="verify-step">
+          <div class="verify-step__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg>
+          </div>
+          <div class="verify-step__body">
+            <h4>Create Profile</h4>
+            <p>Sign up &amp; complete profile.</p>
+          </div>
+        </div>
+        <div class="verify-step">
+          <div class="verify-step__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.59 13.51 6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>
+          </div>
+          <div class="verify-step__body">
+            <h4>Connect Platforms</h4>
+            <p>Link socials or documents.</p>
+          </div>
+        </div>
+        <div class="verify-step">
+          <div class="verify-step__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </div>
+          <div class="verify-step__body">
+            <h4>Review</h4>
+            <p>We verify your information.</p>
+          </div>
+        </div>
+        <div class="verify-step">
+          <div class="verify-step__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          </div>
+          <div class="verify-step__body">
+            <h4>Verified</h4>
+            <p>Get your badge &amp; collaborate.</p>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Creator Categories -->
+  <section id="categories" class="py-16 lg:py-24 bg-white text-gray-900">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="category-showcase">
+        <h2 class="category-showcase__title text-center text-white font-extrabold text-xl sm:text-2xl lg:text-3xl leading-tight mb-7 sm:mb-8 lg:mb-9 px-2">
+          Thousands of Influencers Catered To Your Industry
+        </h2>
+
+        <div class="category-pills-grid">
+          <span class="category-pill" style="--pill-color: #ee3e96">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19.5 12.572l-7.5 7.428-7.5-7.428A5 5 0 1 1 12 6.006a5 5 0 1 1 7.5 6.566z"/><path d="M12 6v6"/></svg>
+            Health &amp; Wellness
+          </span>
+          <span class="category-pill" style="--pill-color: #f26e59">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="14" cy="5" r="2"/><path d="M4 20l5-9 4 3 5-9"/></svg>
+            Fitness
+          </span>
+          <span class="category-pill" style="--pill-color: #7c3aed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v3M9 6h6M8 21l4-8 4 8"/><path d="M6 10h12"/></svg>
+            Beauty
+          </span>
+          <span class="category-pill" style="--pill-color: #ff2e88">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+            Fashion
+          </span>
+          <span class="category-pill" style="--pill-color: #3A1A6F">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l7 9-7 9-7-9 7-9z"/></svg>
+            Lifestyle
+          </span>
+          <span class="category-pill" style="--pill-color: #f26e59">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 22h8M12 15v7"/><path d="M7 10c0-2.8 2.2-5 5-5s5 2.2 5 5c0 2.5-1.5 4.5-3.5 5.5L12 15l-1.5-.5C8.5 14.5 7 12.5 7 10z"/><path d="M9 6l1.5-2M15 6l-1.5-2"/></svg>
+            Food &amp; Beverage
+          </span>
+          <span class="category-pill" style="--pill-color: #ff2e88">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            Tech &amp; Gaming
+          </span>
+
+          <span class="category-pill" style="--pill-color: #5c6470">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 8.5h5M12 8.5v7"/></svg>
+            Consumer Apps
+          </span>
+          <span class="category-pill" style="--pill-color: #ee3e96">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h12l-1 14H7L6 4z"/><path d="M9 4V2h6v2"/></svg>
+            Style &amp; Apparel
+          </span>
+          <span class="category-pill" style="--pill-color: #7c3aed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2h12l2 5H4l2-5z"/><path d="M4 7h16v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7z"/><path d="M9 11v2M15 11v2"/></svg>
+            eCommerce
+          </span>
+          <span class="category-pill" style="--pill-color: #f26e59">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.8 19.2L16 11l3.5-3.5C21 7 21.5 5 20 4s-3 .5-3.5 2.5L13 10 4.8 8.2"/><path d="M2 22l4-4"/><path d="M14 6l2-2"/></svg>
+            Travel
+          </span>
+          <span class="category-pill" style="--pill-color: #7c3aed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Finance
+          </span>
+          <span class="category-pill" style="--pill-color: #ee3e96">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            Education
+          </span>
+          <span class="category-pill" style="--pill-color: #f26e59">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 4v16M17 4v16M4 8h4M16 8h4M4 16h4M16 16h4"/></svg>
+            Entertainment
+          </span>
+
+          <span class="category-pill" style="--pill-color: #ee3e96">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            Music &amp; Arts
+          </span>
+          <span class="category-pill" style="--pill-color: #3A1A6F">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="6" y1="12" x2="10" y2="12"/><line x1="8" y1="10" x2="8" y2="14"/><rect x="2" y="6" width="20" height="12" rx="2"/></svg>
+            Gaming
+          </span>
+          <span class="category-pill" style="--pill-color: #ff2e88">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            Sports
+          </span>
+          <span class="category-pill" style="--pill-color: #f26e59">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Parenting
+          </span>
+          <span class="category-pill" style="--pill-color: #7c3aed">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="4" r="2"/><circle cx="18" cy="8" r="2"/><circle cx="20" cy="16" r="2"/><path d="M9 10a5 5 0 0 0-4 8 5 5 0 0 0 8-2"/></svg>
+            Pets
+          </span>
+          <span class="category-pill" style="--pill-color: #ee3e96">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-3"/><path d="M9 9v.01M9 12v.01M9 15v.01M9 18v.01"/></svg>
+            Real Estate
+          </span>
+          <span class="category-pill" style="--pill-color: #2e9e4f">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22v-8M8 14l4-4 4 4"/><path d="M5 10c0-2 2-4 7-4s7 2 7 4c0 3-3 5-7 8-4-3-7-5-7-8z"/></svg>
+            Sustainability
+          </span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How Collaborations Work -->
+  <section id="how-it-works" class="hiw-section py-12 lg:py-16">
+    <div class="hiw-section__bg" aria-hidden="true"></div>
+    <div class="hiw-section__orb hiw-section__orb--1" aria-hidden="true"></div>
+    <div class="hiw-section__orb hiw-section__orb--2" aria-hidden="true"></div>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-[1]">
+      <header class="hiw-header">
+        <span class="hiw-eyebrow">The workflow</span>
+        <h2 class="hiw-title">How Collaborations <span>Work</span></h2>
+        <p class="hiw-subtitle">From discovery to growth — a seamless workflow for brands and creators.</p>
+        <div class="hiw-phases" aria-hidden="true">
+          <span class="hiw-phases__item">Discover</span>
+          <span class="hiw-phases__item">Connect</span>
+          <span class="hiw-phases__item">Finalize</span>
+          <span class="hiw-phases__item">Track</span>
+          <span class="hiw-phases__item">Grow</span>
+        </div>
+      </header>
+
+      <div class="hiw-timeline">
+        <article class="hiw-step">
+          <div class="hiw-step__visual">
+            <div class="hiw-scene hiw-scene--discover">
+              <span class="hiw-discover-ring"></span>
+              <span class="hiw-discover-ring"></span>
+              <span class="hiw-discover-ring"></span>
+              <span class="hiw-avatar hiw-avatar--a"></span>
+              <span class="hiw-avatar hiw-avatar--b"></span>
+              <span class="hiw-avatar hiw-avatar--c"></span>
+            </div>
+          </div>
+          <div class="hiw-step__content">
+            <span class="hiw-step__num">01</span>
+            <h3>Discover Creators</h3>
+            <p>Intelligent matching surfaces creators by niche, audience, engagement, and location — so you find the right voice faster.</p>
+          </div>
+        </article>
+
+        <article class="hiw-step hiw-step--reverse">
+          <div class="hiw-step__visual">
+            <div class="hiw-scene hiw-scene--chat">
+              <div class="hiw-bubble hiw-bubble--brand">Let&apos;s collaborate on a launch!</div>
+              <div class="hiw-bubble hiw-bubble--creator">Love it — sending my rate card.</div>
+              <div class="hiw-typing" aria-hidden="true"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+          <div class="hiw-step__content">
+            <span class="hiw-step__num">02</span>
+            <h3>Connect &amp; Chat</h3>
+            <p>Direct messaging keeps every conversation in one place — pitch ideas, negotiate terms, and build trust without leaving Influnet.</p>
+          </div>
+        </article>
+
+        <article class="hiw-step">
+          <div class="hiw-step__visual">
+            <div class="hiw-scene hiw-scene--contract">
+              <div class="hiw-doc">
+                <div class="hiw-doc__line"></div>
+                <div class="hiw-doc__line hiw-doc__line--short"></div>
+                <div class="hiw-doc__line hiw-doc__line--accent"></div>
+              </div>
+              <span class="hiw-check" aria-hidden="true">✓</span>
+            </div>
+          </div>
+          <div class="hiw-step__content">
+            <span class="hiw-step__num">03</span>
+            <h3>Finalize Collaboration</h3>
+            <p>Lock in deliverables, timelines, and payment with clear terms — both sides protected before content goes live.</p>
+          </div>
+        </article>
+
+        <article class="hiw-step hiw-step--reverse">
+          <div class="hiw-step__visual">
+            <div class="hiw-scene hiw-scene--track">
+              <div class="hiw-track-row">
+                <span class="hiw-track-label">Brief</span>
+                <div class="hiw-track-bar"><div class="hiw-track-fill"></div></div>
+              </div>
+              <div class="hiw-track-row">
+                <span class="hiw-track-label">Content</span>
+                <div class="hiw-track-bar"><div class="hiw-track-fill"></div></div>
+              </div>
+              <div class="hiw-track-row">
+                <span class="hiw-track-label">Results</span>
+                <div class="hiw-track-bar"><div class="hiw-track-fill"></div></div>
+              </div>
+            </div>
+          </div>
+          <div class="hiw-step__content">
+            <span class="hiw-step__num">04</span>
+            <h3>Track Progress</h3>
+            <p>Milestones, deliverables, and campaign health in one shared view — brands and creators stay aligned without switching tools.</p>
+          </div>
+        </article>
+
+        <article class="hiw-step">
+          <div class="hiw-step__visual">
+            <div class="hiw-scene hiw-scene--grow">
+              <span class="hiw-grow-arrow" aria-hidden="true">↗</span>
+              <span class="hiw-bar-col"></span>
+              <span class="hiw-bar-col"></span>
+              <span class="hiw-bar-col"></span>
+              <span class="hiw-bar-col"></span>
+            </div>
+          </div>
+          <div class="hiw-step__content">
+            <span class="hiw-step__num">05</span>
+            <h3>Grow Together</h3>
+            <p>Turn one-off collabs into repeat partnerships — scale what works and compound reach over time.</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="hiw-cta-wrap">
+        <a href="./signup.html" data-influnet-app="/signup" class="hiw-cta">Get Started →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section id="pricing" class="py-16 lg:py-24 bg-gray-50 text-gray-900">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-12">
+        <h2 class="text-3xl sm:text-4xl font-extrabold mb-4">Frequently Asked Questions</h2>
+        <p class="text-gray-500">Everything you need to know about Influnet.</p>
+      </div>
+      <div class="space-y-3">
+        <details class="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <summary class="flex items-center justify-between px-6 py-4 cursor-pointer font-semibold text-sm hover:bg-gray-50 transition">
+            Are there any joining fees?
+            <span class="faq-icon text-brand-pink text-xl transition-transform">+</span>
+          </summary>
+          <div class="px-6 pb-4 text-sm text-gray-500 leading-relaxed">
+            Influnet offers flexible plans for businesses and creators. Business plans start with a free tier for discovery, with premium features for advanced matching and campaign management. Creator accounts are free to join.
+          </div>
+        </details>
+        <details class="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <summary class="flex items-center justify-between px-6 py-4 cursor-pointer font-semibold text-sm hover:bg-gray-50 transition">
+            How are creators and businesses verified?
+            <span class="faq-icon text-brand-pink text-xl transition-transform">+</span>
+          </summary>
+          <div class="px-6 pb-4 text-sm text-gray-500 leading-relaxed">
+            Creators undergo social platform verification and audience/engagement review. Businesses complete profile validation and identity confirmation before accessing the platform.
+          </div>
+        </details>
+        <details class="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <summary class="flex items-center justify-between px-6 py-4 cursor-pointer font-semibold text-sm hover:bg-gray-50 transition">
+            Can I chat directly with creators or brands?
+            <span class="faq-icon text-brand-pink text-xl transition-transform">+</span>
+          </summary>
+          <div class="px-6 pb-4 text-sm text-gray-500 leading-relaxed">
+            Yes. Influnet includes built-in direct messaging so you can manage all collaboration conversations in one secure place without switching to external tools.
+          </div>
+        </details>
+        <details class="group bg-white rounded-xl border border-gray-200 overflow-hidden">
+          <summary class="flex items-center justify-between px-6 py-4 cursor-pointer font-semibold text-sm hover:bg-gray-50 transition">
+            Are small influencers eligible to join?
+            <span class="faq-icon text-brand-pink text-xl transition-transform">+</span>
+          </summary>
+          <div class="px-6 pb-4 text-sm text-gray-500 leading-relaxed">
+            Absolutely. Influnet welcomes creators of all sizes — from micro-influencers with engaged niche audiences to creators with millions of followers. Quality and authenticity matter more than follower count.
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- Closing: CTA + Footer -->
+  <section class="closing-wrap">
+    <div class="closing-panel">
+      <div id="cta" class="closing-cta">
+        <h2 class="closing-cta__title">Get started with Influnet and discover your next collaboration.</h2>
+        <div class="closing-cta__actions">
+          <a href="./signup-business.html" data-influnet-app="/signup/business" class="closing-cta__btn closing-cta__btn--primary">Join As Business Owner</a>
+          <a href="./signup-influencer.html" data-influnet-app="/signup/influencer" class="closing-cta__btn closing-cta__btn--secondary">Join As Influencer</a>
+        </div>
+      </div>
+
+      <div class="closing-links">
+        <div class="closing-links__inner px-4 sm:px-6 lg:px-8">
+          <div class="closing-links__grid">
+            <div class="closing-links__brand">
+              <a href="./index.html"><img src="./Asset/Influnet-LOGO/Logo.png" alt="Influnet"></a>
+              <p>Where influence meets opportunity. Connect visionary brands with authentic creators to build impactful collaborations.</p>
+              <div class="closing-links__social">
+                <a href="#" aria-label="Instagram">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/></svg>
+                </a>
+                <a href="#" aria-label="LinkedIn">
+                  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <h3 class="closing-links__heading">Platform</h3>
+              <ul class="closing-links__list">
+                <li><a href="#platform">Smart Match Engine</a></li>
+                <li><a href="#platform">Search Collaborators</a></li>
+                <li><a href="#connect">Connect with Creators</a></li>
+                <li><a href="#how-it-works">How It Works</a></li>
+                <li><a href="#categories">Creator Categories</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="closing-links__heading">Categories</h3>
+              <ul class="closing-links__list">
+                <li><a href="#categories">Fashion</a></li>
+                <li><a href="#categories">Beauty &amp; Wellness</a></li>
+                <li><a href="#categories">Tech &amp; Gaming</a></li>
+                <li><a href="#categories">Food &amp; Beverage</a></li>
+                <li><a href="#categories">Lifestyle</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="closing-links__heading">Account</h3>
+              <ul class="closing-links__list">
+                <li><a href="./login.html" data-influnet-app="/login">Log in</a></li>
+                <li><a href="./signup.html" data-influnet-app="/signup">Sign up</a></li>
+                <li><a href="./signup-business.html" data-influnet-app="/signup/business">Business sign up</a></li>
+                <li><a href="./signup-influencer.html" data-influnet-app="/signup/influencer">Creator sign up</a></li>
+                <li><a href="./dashboard.html" data-influnet-app="/dashboard">Business dashboard</a></li>
+                <li><a href="./dashboard-influencer.html" data-influnet-app="/dashboard/influencer">Creator dashboard</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="closing-links__heading">Resources</h3>
+              <ul class="closing-links__list">
+                <li><a href="#pricing">FAQ</a></li>
+                <li><a href="#platform">For Businesses</a></li>
+                <li><a href="#categories">For Influencers</a></li>
+                <li><a href="mailto:hello@influnet.io">Support</a></li>
+                <li><a href="./discover.html">Discover Creators</a></li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 class="closing-links__heading">Company</h3>
+              <ul class="closing-links__list">
+                <li><a href="#">About Influnet</a></li>
+                <li><a href="#pricing">Pricing</a></li>
+                <li><a href="mailto:hello@influnet.io">Contact</a></li>
+                <li><a href="#">Privacy Policy</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <footer id="contact" class="site-footer">
+        <span class="site-footer__watermark" aria-hidden="true">influnet</span>
+        <div class="site-footer__bar max-w-7xl mx-auto w-full">
+          <p>&copy; 2026 Influnet. All rights reserved.</p>
+          <nav class="site-footer__links" aria-label="Legal">
+            <a href="#">Terms of Service</a>
+            <a href="#">Privacy Policy</a>
+            <a href="mailto:hello@influnet.io">Support</a>
+            <a href="#">Cookie Policy</a>
+          </nav>
+        </div>
+      </footer>
+    </div>
+  </section>
+  </main>
+
+  <script>
+    const menuBtn = document.getElementById('menu-btn');
+    const mobileMenu = document.getElementById('mobile-menu');
+    menuBtn.addEventListener('click', () => mobileMenu.classList.toggle('hidden'));
+    mobileMenu.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+    });
+
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      const hiwTargets = document.querySelectorAll('.hiw-step, .hiw-cta-wrap');
+      const hiwObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('is-visible');
+              hiwObserver.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.18, rootMargin: '0px 0px -6% 0px' }
+      );
+      hiwTargets.forEach((el) => hiwObserver.observe(el));
+    } else {
+      document.querySelectorAll('.hiw-step, .hiw-cta-wrap').forEach((el) => el.classList.add('is-visible'));
+    }
+  </script>
+</body>
+</html>

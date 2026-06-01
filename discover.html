@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Influnet Discover</title>
+  <link rel="icon" type="image/png" href="./Asset/favicon.png">
+  <script src="./app-config.js"></script>
+  <script src="./site-nav.js" defer></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="font-sans bg-[#f3f2f1] text-gray-900">
+  <section class="py-8 lg:py-12 px-3 sm:px-6">
+    <div class="max-w-7xl mx-auto bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
+      <div class="px-4 sm:px-8 h-16 border-b border-gray-200 flex items-center justify-between">
+        <div class="flex items-center gap-6">
+          <a href="./index.html">
+            <img src="./Asset/Influnet-LOGO/Black -Logo.png" alt="Influnet" class="h-12 sm:h-14">
+          </a>
+          <div class="hidden md:flex items-center gap-5 text-sm text-gray-600">
+            <a href="./index.html" class="text-[#7c3aed] font-semibold">Home</a>
+            <a href="#" class="hover:text-gray-900">Creator reviews</a>
+            <a href="#" class="hover:text-gray-900">Campaign guide</a>
+          </div>
+        </div>
+        <div class="text-sm text-gray-600">
+          <a href="./login.html" data-influnet-app="/login" class="text-[#7c3aed] font-semibold">Sign in</a>
+          <span class="mx-2 text-gray-300">|</span>
+          <a href="./signup-business.html" data-influnet-app="/signup/business" class="hover:text-gray-900">For Businesses</a>
+          <span class="mx-2 text-gray-300 hidden sm:inline">|</span>
+          <a href="./signup-influencer.html" data-influnet-app="/signup/influencer" class="hover:text-gray-900 hidden sm:inline">For Creators</a>
+          <span class="mx-2 text-gray-300 hidden md:inline">|</span>
+          <a href="./dashboard.html" data-influnet-app="/dashboard" class="hover:text-gray-900 hidden md:inline">Dashboard</a>
+        </div>
+      </div>
+
+      <div class="px-4 sm:px-8 py-8 sm:py-10">
+        <form id="creator-search-form" class="max-w-4xl mx-auto rounded-2xl border border-gray-300 bg-white shadow-sm flex flex-col md:flex-row overflow-hidden">
+          <input
+            id="keyword-input"
+            type="search"
+            list="keyword-suggestions"
+            class="flex-1 px-4 py-3 border-b md:border-b-0 md:border-r border-gray-200 text-sm text-gray-700 outline-none"
+            placeholder="Niche or keyword (e.g. fashion, skincare UGC, tech reviewer)"
+            aria-label="Search influencer niche or keyword"
+          >
+          <input
+            id="location-input"
+            type="search"
+            list="location-suggestions"
+            class="flex-1 px-4 py-3 border-b md:border-b-0 md:border-r border-gray-200 text-sm text-gray-700 outline-none"
+            placeholder="City, state, or zip code"
+            aria-label="Search by location"
+          >
+          <button type="submit" class="bg-gradient-to-r from-[#ee3e96] to-[#f26e59] text-white px-6 py-3 text-sm font-semibold">Find creators</button>
+        </form>
+        <datalist id="keyword-suggestions">
+          <option value="Fashion influencer"></option>
+          <option value="Skincare UGC creator"></option>
+          <option value="Fitness coach creator"></option>
+          <option value="Food review creator"></option>
+          <option value="Tech gadget reviewer"></option>
+          <option value="Mom lifestyle creator"></option>
+          <option value="Travel vlogger"></option>
+        </datalist>
+        <datalist id="location-suggestions">
+          <option value="Coimbatore"></option>
+          <option value="Mumbai"></option>
+          <option value="Bengaluru"></option>
+          <option value="Chennai"></option>
+          <option value="Delhi NCR"></option>
+        </datalist>
+        <div class="max-w-4xl mx-auto mt-3 flex flex-wrap gap-2">
+          <button type="button" class="quick-keyword px-3 py-1.5 rounded-full bg-gray-100 text-xs text-gray-700 hover:bg-gray-200" data-keyword="Fashion influencer">Fashion</button>
+          <button type="button" class="quick-keyword px-3 py-1.5 rounded-full bg-gray-100 text-xs text-gray-700 hover:bg-gray-200" data-keyword="Skincare UGC creator">Skincare UGC</button>
+          <button type="button" class="quick-keyword px-3 py-1.5 rounded-full bg-gray-100 text-xs text-gray-700 hover:bg-gray-200" data-keyword="Tech gadget reviewer">Tech</button>
+          <button type="button" class="quick-keyword px-3 py-1.5 rounded-full bg-gray-100 text-xs text-gray-700 hover:bg-gray-200" data-keyword="Food review creator">Food</button>
+          <button type="button" class="quick-keyword px-3 py-1.5 rounded-full bg-gray-100 text-xs text-gray-700 hover:bg-gray-200" data-keyword="Travel vlogger">Travel</button>
+        </div>
+        <p id="search-feedback" class="max-w-4xl mx-auto mt-3 text-sm text-gray-500"></p>
+
+        <div class="text-center pt-10 pb-8">
+          <h1 class="text-3xl sm:text-4xl font-extrabold mb-3">Your next collaboration starts here</h1>
+          <p class="text-gray-600 max-w-2xl mx-auto mb-6">Create an account or sign in to see personalized creator recommendations for your brand.</p>
+          <a href="./signup.html" data-influnet-app="/signup" class="inline-flex items-center gap-2 px-8 py-3 rounded-xl bg-gradient-to-r from-[#ee3e96] to-[#f26e59] text-white font-semibold">
+            Get Started <span>→</span>
+          </a>
+          <p class="mt-4 text-sm text-gray-500">
+            Already have an account?
+            <a href="./login.html" data-influnet-app="/login" class="text-[#7c3aed] font-semibold hover:underline">Sign in</a>
+            · Business:
+            <a href="./dashboard.html" data-influnet-app="/dashboard" class="text-[#7c3aed] font-semibold hover:underline">Dashboard</a>
+            · Creator:
+            <a href="./dashboard-influencer.html" data-influnet-app="/dashboard/influencer" class="text-[#7c3aed] font-semibold hover:underline">Dashboard</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script>
+    const searchForm = document.getElementById('creator-search-form');
+    const keywordInput = document.getElementById('keyword-input');
+    const locationInput = document.getElementById('location-input');
+    const feedback = document.getElementById('search-feedback');
+    const quickKeywords = document.querySelectorAll('.quick-keyword');
+
+    quickKeywords.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        keywordInput.value = chip.dataset.keyword || '';
+        keywordInput.focus();
+      });
+    });
+
+    searchForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const keyword = keywordInput.value.trim() || 'all niches';
+      const location = locationInput.value.trim() || 'all locations';
+      feedback.textContent = `Searching creators for "${keyword}" in "${location}".`;
+    });
+  </script>
+</body>
+</html>
