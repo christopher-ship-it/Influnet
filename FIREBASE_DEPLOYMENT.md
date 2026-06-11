@@ -1,6 +1,6 @@
 # Firebase Hosting — Influnet
 
-Firebase serves **one React SPA** from this folder.
+Firebase serves the **`influnet/`** folder as the site root (single React SPA).
 
 | URL | What |
 |-----|------|
@@ -18,33 +18,24 @@ Project ID is in `.firebaserc` (`influnet-63626`).
 
 ## Before each deploy
 
-Build the React app and copy assets into the site root (required for the site to work).
+Build the React app and copy assets into `influnet/`:
 
-**WSL or Git Bash**, from `d:\influnet.io\Influnet-Io\Influnet-Io`:
-
-```bash
-export PORT=5000
-export BASE_PATH=/
-pnpm install
-pnpm --filter @workspace/influnet build
-```
-
-Copy output:
-
-```bash
-cp -r artifacts/influnet/dist/public/assets/* /mnt/d/influnet/assets/
-cp artifacts/influnet/dist/public/favicon.svg /mnt/d/influnet/
-```
-
-If hashed bundle names changed, update `index.html` script/link paths.
-
-**Windows PowerShell**:
+**Windows PowerShell** (from repo root):
 
 ```powershell
 .\scripts\build-react-app.ps1
 ```
 
-Confirm `assets/index-*.js` exists and `index.html` references match.
+**WSL / Git Bash** (from `d:\influnet.io\Influnet-Io\Influnet-Io`):
+
+```bash
+export PORT=5000 BASE_PATH=/
+pnpm install
+pnpm --filter @workspace/influnet build
+cp -r artifacts/influnet/dist/public/assets/* /mnt/d/influnet/influnet/assets/
+```
+
+If hashed bundle names changed, update `influnet/index.html` script/link paths.
 
 ---
 
@@ -56,50 +47,27 @@ firebase login
 firebase deploy --only hosting
 ```
 
-Preview channel (optional):
-
-```bash
-firebase hosting:channel:deploy preview
-```
-
 ---
 
-## Custom domain (influnet.io)
+## Local test
 
-1. Firebase Console → **Hosting** → **Add custom domain**
-2. Add `influnet.io` and `www.influnet.io` (or your chosen canonical host)
-3. Add the DNS records Firebase shows at your registrar
-4. Wait for SSL provisioning (often minutes, DNS up to 24h)
+```bash
+cd d:\influnet
+firebase emulators:start --only hosting
+```
 
-All routes share one origin; no `/app` prefix.
+- http://127.0.0.1:5000/ → landing  
+- http://127.0.0.1:5000/login → React login  
 
 ---
 
 ## What gets uploaded
 
-- `index.html` — SPA shell
-- `assets/` — Vite build
-- `Asset/` — marketing media
-- `favicon.svg`, `robots.txt`, legacy `*.html` redirects
+Everything under **`influnet/`** only:
 
-Not uploaded (see `firebase.json` `ignore`): `main.py`, `scripts/`, `influnet.io/`, dotfiles, Replit files.
+- `index.html`, `assets/`, `Asset/`, `favicon.svg`, `robots.txt`, legacy `*.html`
 
----
-
-## Routing
-
-- Existing static files are served as-is (`/Asset/...`, `/assets/...`, `login.html`, etc.).
-- All other paths rewrite to `/index.html` for client-side routing (Wouter, base `/`).
-
----
-
-## Local testing
-
-```bash
-firebase emulators:start --only hosting
-# http://localhost:5000/           → landing
-# http://localhost:5000/login      → React login
-```
+Not uploaded: repo root `scripts/`, `influnet.io/`, dotfiles (see `firebase.json` `ignore`).
 
 ---
 
@@ -107,23 +75,7 @@ firebase emulators:start --only hosting
 
 | Issue | Fix |
 |-------|-----|
-| Blank page at `/` | Run `build-react-app.ps1`; check browser console for 404 on `/assets/*.js` |
-| 404 on `/login` after refresh | Ensure `rewrites` in `firebase.json` and redeploy |
-| Old `/app/login` links | Firebase 301 redirects `/app/**` → `/**` |
-| Old JS after deploy | Hard refresh; `index.html` is `no-cache`; hashed files under `/assets/` are long-cached |
-| Deploy permission error | `firebase login` and confirm project in `.firebaserc` |
-
----
-
-## CI (optional)
-
-```yaml
-- run: |
-    export PORT=5000 BASE_PATH=/
-    pnpm install --filter @workspace/influnet...
-    pnpm --filter @workspace/influnet build
-    cp -r artifacts/influnet/dist/public/assets/* $GITHUB_WORKSPACE/influnet/assets/
-- run: firebase deploy --only hosting --token ${{ secrets.FIREBASE_TOKEN }}
-```
-
-Generate a token: `firebase login:ci`.
+| Blank page at `/` | Run `build-react-app.ps1`; check 404 on `/assets/*.js` in DevTools |
+| 404 on `/login` after refresh | Redeploy; confirm `rewrites` in `firebase.json` |
+| Old `/app/login` links | Firebase 301 `/app/**` → `/**` |
+| Live site still “Coming Soon” | Run `firebase deploy --only hosting` after merge |

@@ -1,0 +1,270 @@
+.influnet-profile-edit-enhanced > *:not(#influnet-profile-photo-card):not(#influnet-profile-edit-root):not(#influnet-profile-link-mount):not(#influnet-influencer-account-mount) {
+  display: none !important;
+}
+
+#influnet-profile-edit-root {
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.infl-edit-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.infl-edit-header h1 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.infl-edit-header p {
+  margin: 0.25rem 0 0;
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+.infl-edit-save {
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(105deg, #ee3e96, #f26e59);
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(238, 62, 150, 0.25);
+}
+
+.infl-edit-save:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.infl-edit-card {
+  background: #fff;
+  border: 1px solid #f0f0f3;
+  border-radius: 1rem;
+  padding: 1.15rem 1.2rem;
+  margin-bottom: 1rem;
+  box-shadow: 0 6px 24px rgba(17, 24, 39, 0.05);
+}
+
+.infl-edit-card h2 {
+  margin: 0 0 0.2rem;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.infl-edit-card .sub {
+  margin: 0 0 1rem;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.infl-edit-grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+@media (max-width: 640px) {
+  .infl-edit-grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.infl-edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.75rem;
+}
+
+.infl-edit-field label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #6b7280;
+}
+
+.infl-edit-field input,
+.infl-edit-field select,
+.infl-edit-field textarea {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.85rem;
+  color: #111827;
+  background: #fafafa;
+}
+
+.infl-edit-field input:focus,
+.infl-edit-field select:focus,
+.infl-edit-field textarea:focus {
+  outline: none;
+  border-color: #ee3e96;
+  box-shadow: 0 0 0 3px rgba(238, 62, 150, 0.12);
+}
+
+.infl-edit-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.infl-edit-chip {
+  border: 1px solid #e5e7eb;
+  border-radius: 999px;
+  padding: 0.35rem 0.7rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: #fff;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.infl-edit-chip.active {
+  border-color: #ee3e96;
+  background: #fdf2f8;
+  color: #ee3e96;
+}
+
+.infl-edit-collab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.infl-edit-collab-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.85rem;
+  padding: 0.75rem;
+  text-align: left;
+  cursor: pointer;
+  background: #fff;
+}
+
+.infl-edit-collab-card.active {
+  border-color: #ee3e96;
+  background: #fdf2f8;
+}
+
+.infl-edit-collab-card strong {
+  display: block;
+  font-size: 0.82rem;
+  color: #111827;
+}
+
+.infl-edit-collab-card span {
+  font-size: 0.68rem;
+  color: #6b7280;
+}
+
+.infl-edit-price-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .infl-edit-price-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.infl-edit-price-btn {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.4rem;
+  text-align: center;
+  cursor: pointer;
+  background: #fff;
+}
+
+.infl-edit-price-btn.active {
+  border-color: #ee3e96;
+  background: #fdf2f8;
+}
+
+.infl-edit-price-btn .tier {
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #6b7280;
+}
+
+.infl-edit-price-btn.active .tier {
+  color: #ee3e96;
+}
+
+.infl-edit-price-btn .range {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #111827;
+  margin-top: 0.15rem;
+}
+
+.infl-edit-social-row {
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.infl-edit-social-row label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #374151;
+}
+
+.infl-edit-extra-row {
+  display: grid;
+  grid-template-columns: 6rem 1fr auto;
+  gap: 0.45rem;
+  margin-bottom: 0.45rem;
+}
+
+.infl-edit-msg {
+  margin-bottom: 1rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.infl-edit-msg.ok {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.infl-edit-msg.err {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.infl-edit-add-btn {
+  border: 1px dashed #d1d5db;
+  border-radius: 0.65rem;
+  padding: 0.4rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #ee3e96;
+  background: transparent;
+  cursor: pointer;
+}
+
+.infl-edit-remove-btn {
+  border: none;
+  background: #fef2f2;
+  color: #b91c1c;
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.68rem;
+  cursor: pointer;
+}

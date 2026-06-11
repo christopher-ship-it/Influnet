@@ -1,0 +1,7 @@
+# Influnet Supabase project (for CLI: supabase link)
+# Dashboard: https://supabase.com/dashboard/project/hrpaqufvjcihnjrjnpej
+
+project_id = "hrpaqufvjcihnjrjnpej"
+
+[api]
+url = "https://hrpaqufvjcihnjrjnpej.supabase.co"

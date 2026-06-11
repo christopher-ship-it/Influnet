@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "public": ".",
+    "public": "influnet",
     "ignore": [
       "firebase.json",
       "**/.*",
@@ -9,7 +9,6 @@
       ".replit",
       "REPLIT_DEPLOY.md",
       "scripts/**",
-      "app/README.md",
       "influnet.io/**"
     ],
     "headers": [
@@ -55,6 +54,26 @@
       {
         "source": "/app/**",
         "destination": "/:splat",
+        "type": 301
+      },
+      {
+        "source": "/pricing",
+        "destination": "/",
+        "type": 301
+      },
+      {
+        "source": "/pricing/**",
+        "destination": "/",
+        "type": 301
+      },
+      {
+        "source": "/influencer/:slug",
+        "destination": "/influnet/:slug",
+        "type": 301
+      },
+      {
+        "source": "/profile/:slug",
+        "destination": "/influnet/:slug",
         "type": 301
       }
     ],

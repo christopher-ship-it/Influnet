@@ -1,0 +1,653 @@
+/* Greeting lives in main content (not React header) on Dashboard home only */
+.influnet-dash-greeting-banner {
+  margin-bottom: 1rem;
+}
+
+.influnet-dash-greeting-banner .influnet-dash-greeting h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.25;
+}
+
+.influnet-dash-greeting-banner .influnet-dash-greeting p {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  max-width: 36rem;
+}
+
+/* Legacy: header shell (no longer applied) */
+.influnet-dash-shell-header {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 1rem;
+  padding: 1rem 1.5rem !important;
+  background: #f5f6fa !important;
+  border-bottom: none !important;
+}
+
+.influnet-dash-shell-header > .flex.items-center.gap-3 {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.influnet-dash-shell-header .influnet-dash-greeting h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1.25;
+}
+
+.influnet-dash-shell-header .influnet-dash-greeting p {
+  margin: 0.35rem 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+  max-width: 36rem;
+}
+
+.influnet-dash-shell-header .influnet-dash-header-actions {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.influnet-dash-shell-header .influnet-dash-header-actions > button {
+  flex-shrink: 0;
+}
+
+.influnet-dash-shell-header .influnet-dash-header-actions > .relative {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.influnet-dash-shell-header .influnet-dash-header-actions button.flex.items-center {
+  display: inline-flex !important;
+  align-items: center !important;
+}
+
+#influnet-dashboard-hero-mount {
+  width: 100%;
+  order: -1;
+}
+
+#influnet-dashboard-hero,
+.influnet-dash-hero-section {
+  margin: 0 0 0;
+  border-radius: 1.25rem;
+  background: linear-gradient(105deg, #ee3e96 0%, #f26e59 100%);
+  box-shadow: 0 18px 40px rgba(238, 62, 150, 0.22);
+  overflow: hidden;
+  position: relative;
+}
+
+.influnet-dash-hero-inner {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  padding: 1.25rem 1.25rem 1.15rem;
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .influnet-dash-hero-inner {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
+    padding: 1.15rem 1rem 1.15rem 2rem;
+    min-height: 0;
+    align-items: center;
+  }
+}
+
+.influnet-dash-hero-copy h2 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.influnet-dash-hero-copy > p {
+  margin: 0.4rem 0 0.75rem;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.92);
+  max-width: 28rem;
+}
+
+.influnet-dash-search-wrap {
+  display: flex;
+  align-items: stretch;
+  background: #fff;
+  border-radius: 9999px;
+  padding: 0.25rem 0.25rem 0.25rem 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  max-width: 34rem;
+}
+
+.influnet-dash-search-wrap input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.9rem;
+  color: #111827;
+  background: transparent;
+  min-width: 0;
+}
+
+.influnet-dash-search-wrap input::placeholder {
+  color: #9ca3af;
+}
+
+.influnet-dash-search-btn {
+  width: 2.4rem;
+  height: 2.4rem;
+  border: none;
+  border-radius: 0.85rem;
+  background: #ee3e96;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.influnet-dash-search-btn:hover {
+  background: #d93686;
+}
+
+.influnet-dash-search-btn:active {
+  transform: scale(0.97);
+}
+
+.influnet-dash-search-results {
+  margin: 0.85rem 0 0;
+  max-width: 38rem;
+  color: #111827;
+}
+
+.influnet-dash-search-results:not([hidden]) {
+  display: block;
+}
+
+.influnet-dash-search-results-head h3 {
+  color: #fff;
+}
+
+.influnet-dash-search-results-head span {
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.influnet-dash-search-public-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.1rem 1.15rem;
+  border-radius: 1rem;
+  border: 1px solid #eceef3;
+  background: #fff;
+  box-shadow: 0 10px 28px rgba(17, 24, 39, 0.12);
+  color: #111827;
+}
+
+.influnet-dash-search-public-card .influnet-dash-search-card-body {
+  flex: 1;
+  min-width: 10rem;
+}
+
+.influnet-dash-search-public-card .influnet-dash-search-card-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #111827;
+}
+
+.influnet-dash-search-public-card .influnet-dash-search-card-niche {
+  font-size: 0.82rem;
+  color: #4b5563;
+  font-weight: 600;
+}
+
+.influnet-dash-search-public-card .influnet-dash-search-card-handle {
+  font-size: 0.78rem;
+  color: #7c3aed;
+  font-weight: 700;
+}
+
+.influnet-dash-search-public-card .influnet-dash-search-card-loc {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.influnet-dash-search-public-card .influnet-dash-search-card-bio {
+  margin: 0.45rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #374151;
+}
+
+.influnet-dash-search-public-card .influnet-dash-search-card-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.85rem;
+  margin-top: 0.5rem;
+}
+
+.influnet-dash-search-public-card .influnet-dash-search-card-stat {
+  font-size: 0.72rem;
+  color: #4b5563;
+}
+
+.influnet-dash-search-public-card .influnet-dash-search-card-stat strong {
+  color: #111827;
+}
+
+.influnet-dash-search-public-card .influnet-dash-search-card-avatar {
+  width: 3.5rem;
+  height: 3.5rem;
+  font-size: 1.15rem;
+  overflow: hidden;
+}
+
+.influnet-dash-search-public-card .influnet-dash-search-card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 999px;
+}
+
+.influnet-dash-search-open-btn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1rem;
+  border-radius: 0.75rem;
+  background: #ee3e96;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.influnet-dash-search-open-btn:hover {
+  background: #d93686;
+}
+
+.influnet-dash-search-card-loc {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  color: #6b7280;
+}
+
+.influnet-dash-search-results-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+.influnet-dash-search-results-head h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.influnet-dash-search-results-head span {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.88);
+}
+
+.influnet-dash-search-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.influnet-dash-search-card {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  padding: 0.85rem;
+  border-radius: 1rem;
+  border: 1px solid #eceef3;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(17, 24, 39, 0.05);
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.influnet-dash-search-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.08);
+}
+
+.influnet-dash-search-card-avatar {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #7c3aed, #ee3e96);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.influnet-dash-search-card-body {
+  min-width: 0;
+}
+
+.influnet-dash-search-card-name {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.influnet-dash-search-card-niche,
+.influnet-dash-search-card-handle {
+  margin: 0.15rem 0 0;
+  font-size: 0.72rem;
+  color: #6b7280;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.influnet-dash-search-card-handle {
+  color: #7c3aed;
+  font-weight: 600;
+}
+
+.influnet-dash-search-status {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  color: #6b7280;
+}
+
+.influnet-dash-search-error {
+  color: #dc2626;
+}
+
+.influnet-dash-search-empty {
+  margin-top: 0.75rem;
+  padding: 1rem 1.1rem;
+  border-radius: 1rem;
+  background: #fff;
+  border: 1px solid #eceef3;
+}
+
+.influnet-dash-search-empty h3 {
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+  color: #111827;
+}
+
+.influnet-dash-search-empty p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #6b7280;
+}
+
+.influnet-dash-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.65rem;
+}
+
+.influnet-dash-chip {
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.influnet-dash-chip:hover,
+.influnet-dash-chip.is-active {
+  background: rgba(255, 255, 255, 0.28);
+  border-color: rgba(255, 255, 255, 0.75);
+}
+
+.influnet-dash-chip-more-wrap {
+  position: relative;
+}
+
+.influnet-dash-chip-more-menu {
+  display: none;
+  position: absolute;
+  top: calc(100% + 0.35rem);
+  left: 0;
+  min-width: 9rem;
+  background: #fff;
+  border-radius: 0.75rem;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.14);
+  padding: 0.35rem;
+  z-index: 20;
+}
+
+.influnet-dash-chip-more-wrap.is-open .influnet-dash-chip-more-menu {
+  display: block;
+}
+
+.influnet-dash-chip-more-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: #374151;
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.45rem 0.65rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+}
+
+.influnet-dash-chip-more-menu button:hover {
+  background: #f3f4f6;
+}
+
+.influnet-dash-hero-art {
+  display: none;
+  width: 100%;
+  min-height: 0;
+  overflow: visible;
+}
+
+@media (min-width: 900px) {
+  .influnet-dash-hero-art {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-height: 0;
+    margin: 0;
+  }
+}
+
+.influnet-dash-hero-image-slot {
+  width: 100%;
+  min-height: 160px;
+  border: 2px dashed rgba(255, 255, 255, 0.55);
+  border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.influnet-dash-hero-image-slot:not(.is-empty) {
+  border: none;
+  background: transparent;
+  min-height: 0;
+  height: auto;
+  overflow: visible;
+}
+
+.influnet-dash-hero-image-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.88);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  pointer-events: none;
+}
+
+.influnet-dash-hero-image-slot.is-empty .influnet-dash-hero-img {
+  display: none;
+}
+
+.influnet-dash-hero-image-slot:not(.is-empty) .influnet-dash-hero-image-label {
+  display: none;
+}
+
+.influnet-dash-hero-image-slot img,
+.influnet-dash-hero-image-slot .influnet-dash-hero-img {
+  width: 100%;
+  height: auto;
+  max-height: 13.5rem;
+  object-fit: contain;
+  object-position: center right;
+  display: block;
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.1));
+}
+
+.influnet-dash-hide-welcome {
+  display: none !important;
+}
+
+.influnet-dash-home-main {
+  background: #f5f6fa !important;
+}
+
+.influnet-dash-home-main .p-6.space-y-6 {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Messages / chat panel needs bounded flex height */
+.flex.h-screen > .flex-1.flex.flex-col.min-w-0 {
+  min-height: 0;
+}
+
+.flex.h-screen main.flex-1.overflow-hidden.flex.flex-col {
+  min-height: 0;
+}
+
+/* Messages tab: main column must pass height to chat (oy / OC) */
+.flex.h-screen > .flex-1.flex.flex-col.min-w-0 > main.flex-1 {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.flex.h-screen > .flex-1.flex.flex-col.min-w-0 > main.flex-1 > * {
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+}
+
+/* Messages tab: never show home greeting / hero; force chat panel height */
+body.infl-business-messages-view .influnet-dash-greeting,
+body.infl-business-messages-view #influnet-dashboard-hero,
+body.infl-business-messages-view #influnet-dashboard-hero-mount {
+  display: none !important;
+}
+
+body.infl-business-messages-view .flex.h-screen > .flex-1.flex.flex-col.min-w-0 {
+  position: relative;
+  min-height: 0;
+}
+
+body.infl-business-messages-view .flex.h-screen > .flex-1.flex.flex-col.min-w-0 > main.flex-1 {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 1 0 !important;
+  min-height: calc(100dvh - 3.5rem) !important;
+  height: calc(100dvh - 3.5rem) !important;
+  overflow: hidden !important;
+}
+
+.influnet-react-messages-root,
+body.infl-business-messages-view .influnet-react-messages-root {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+body.infl-business-messages-view .flex.h-screen > .flex-1.flex.flex-col.min-w-0 > main.flex-1 > * {
+  flex: 1 1 0 !important;
+  min-height: 0 !important;
+  min-width: 0 !important;
+  width: 100%;
+}
+
+body.infl-business-messages-view .flex.h-screen > .flex-1.flex.flex-col.min-w-0 > main.flex-1 > *:not(#influnet-dashboard-hero-mount) {
+  display: flex !important;
+  flex-direction: column !important;
+  visibility: visible !important;
+}
+
+.influnet-dash-search-card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.influnet-dash-search-message-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0.75rem;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  color: #374151;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.influnet-dash-search-message-btn:hover {
+  border-color: #7c3aed;
+  color: #7c3aed;
+}
+
+.influnet-dash-search-public-card .influnet-dash-search-card-actions {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
