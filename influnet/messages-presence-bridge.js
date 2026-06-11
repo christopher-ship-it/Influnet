@@ -1,15 +1,17 @@
 /**
- * Messages: presence ping, last-seen subtitle, cross-user typing via /status polling.
+ * Messages: presence ping, typing (cross-user via DB), live status for React + business standalone.
  */
 (function () {
   const PING_MS = 30000;
   const STATUS_MS = 2500;
   const TYPING_HIDE_MS = 3500;
+  const TYPING_SEND_MS = 1500;
 
   let pingTimer = null;
   let statusTimer = null;
   let activeConvId = null;
   let typingUntil = 0;
+  let lastTypingSent = 0;
 
   function isDashboard() {
     const path = window.location.pathname.replace(/\/$/, "") || "/";
@@ -38,6 +40,10 @@
     return null;
   }
 
+  function isStandaloneMessages() {
+    return !!document.getElementById("influnet-biz-msgs-standalone")?.offsetParent;
+  }
+
   async function pingPresence() {
     const token = getToken();
     if (!token) return;
@@ -64,6 +70,12 @@
   }
 
   function getActiveConversationName() {
+    if (window.influnetBizMsgsActiveConversationId) {
+      const item = document.querySelector(
+        "#influnet-biz-msgs-standalone .infl-biz-msgs-item.is-active .infl-biz-msgs-item-name"
+      );
+      if (item) return item.textContent.trim();
+    }
     const btn = document.querySelector(
       ".w-72 button.bg-violet-50, [class*='w-72'] button.bg-violet-50"
     );
@@ -73,6 +85,8 @@
   }
 
   function getChatHeaderSubtitle() {
+    const standalone = document.getElementById("infl-biz-msgs-status");
+    if (standalone) return standalone;
     const main = document.querySelector("main.flex-1");
     if (!main) return null;
     const headers = main.querySelectorAll(
@@ -86,6 +100,8 @@
   }
 
   function getMessageScrollArea() {
+    const standalone = document.getElementById("infl-biz-msgs-bubbles");
+    if (standalone) return standalone;
     const main = document.querySelector("main.flex-1");
     if (!main) return null;
     return main.querySelector(
@@ -96,7 +112,10 @@
   function reactShowsTyping() {
     const area = getMessageScrollArea();
     if (!area) return false;
-    return area.querySelector(".animate-bounce") !== null;
+    return (
+      area.querySelector(".animate-bounce") !== null &&
+      !area.querySelector(".infl-presence-typing")
+    );
   }
 
   function setTypingIndicator(show) {
@@ -123,6 +142,9 @@
   }
 
   async function resolveActiveConversationId() {
+    if (window.influnetBizMsgsActiveConversationId) {
+      return window.influnetBizMsgsActiveConversationId;
+    }
     const name = getActiveConversationName();
     if (!name) return null;
     const token = getToken();
@@ -145,6 +167,39 @@
     }
   }
 
+  async function sendTypingPing(convId) {
+    const now = Date.now();
+    if (now - lastTypingSent < TYPING_SEND_MS) return;
+    lastTypingSent = now;
+    const token = getToken();
+    if (!token || !convId) return;
+    try {
+      await fetch("/api/conversations/" + convId + "/typing", {
+        method: "POST",
+        headers: { Authorization: "Bearer " + token },
+        credentials: "same-origin",
+      });
+    } catch (_) {}
+  }
+
+  function wireTypingInput() {
+    if (document.documentElement.dataset.inflTypingWire) return;
+    document.documentElement.dataset.inflTypingWire = "1";
+    document.addEventListener(
+      "input",
+      (e) => {
+        if (!isMessagesView()) return;
+        const inStandalone = e.target.closest("#infl-biz-msgs-form input[name='body']");
+        if (!inStandalone) return;
+        const convId =
+          window.influnetBizMsgsActiveConversationId || activeConvId;
+        if (!convId || !e.target.value.trim()) return;
+        sendTypingPing(convId);
+      },
+      true
+    );
+  }
+
   async function pollConversationStatus() {
     if (!isMessagesView()) {
       activeConvId = null;
@@ -152,7 +207,10 @@
       return;
     }
 
-    const convId = (await resolveActiveConversationId()) || activeConvId;
+    const convId =
+      window.influnetBizMsgsActiveConversationId ||
+      (await resolveActiveConversationId()) ||
+      activeConvId;
     if (!convId) return;
     activeConvId = convId;
 
@@ -201,6 +259,7 @@
       statusTimer = null;
       return;
     }
+    wireTypingInput();
     startPing();
     startStatusPoll();
   }
@@ -208,5 +267,5 @@
   boot();
   window.addEventListener("load", boot);
   window.addEventListener("popstate", boot);
-  setInterval(boot, 3000);
+  setInterval(boot, 5000);
 })();

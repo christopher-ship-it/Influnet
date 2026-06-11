@@ -6,17 +6,18 @@
 
 (function () {
 
-  const HEADER = "/business-dashboard-header.js?v=30";
+  const HEADER = "/business-dashboard-header.js?v=32";
 
-  const LAYOUT = "/business-dashboard-layout.js?v=27";
+  const LAYOUT = "/business-dashboard-layout.js?v=28";
 
   const CLEANUP = "/business-dashboard-cleanup.js?v=26";
 
-  const MESSAGES = "/business-messages-bridge.js?v=6";
-  const MSG_GUARD = "/business-dashboard-messages-guard.js?v=2";
-  const MSG_STANDALONE = "/business-messages-standalone.js?v=2";
-  const COLLAB_FLOW = "/collab-flow-bridge.js?v=1";
-  const PRESENCE = "/messages-presence-bridge.js?v=1";
+  const MESSAGES = "/business-messages-bridge.js?v=7";
+  const MSG_GUARD = "/business-dashboard-messages-guard.js?v=5";
+  const MSG_STANDALONE = "/business-messages-standalone.js?v=12";
+  const REQ_MESSAGES = "/business-requests-messages-bridge.js?v=1";
+  const COLLAB_FLOW = "/collab-flow-bridge.js?v=2";
+  const PRESENCE = "/messages-presence-bridge.js?v=2";
 
 
 
@@ -75,6 +76,7 @@
     loadOnce(MESSAGES);
     loadOnce(MSG_GUARD);
     loadOnce(MSG_STANDALONE);
+    loadOnce(REQ_MESSAGES);
     loadOnce(COLLAB_FLOW);
     loadOnce(PRESENCE);
 

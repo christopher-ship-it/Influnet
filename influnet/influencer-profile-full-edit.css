@@ -224,6 +224,23 @@
   color: #374151;
 }
 
+.infl-edit-social-row input {
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding: 0.55rem 0.7rem;
+  font-size: 0.82rem;
+  color: #111827;
+  background: #fff;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.infl-edit-social-row input:focus {
+  outline: none;
+  border-color: #ee3e96;
+  box-shadow: 0 0 0 3px rgba(238, 62, 150, 0.12);
+}
+
 .infl-edit-extra-row {
   display: grid;
   grid-template-columns: 6rem 1fr auto;

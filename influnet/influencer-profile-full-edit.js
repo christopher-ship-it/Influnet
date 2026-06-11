@@ -59,15 +59,69 @@
     let selectedCollabs = [];
     let priceRange = "";
     let rendered = false;
+    let remountRequested = false;
+    let mountInFlight = false;
 
     function isEditProfilePage() {
       const path = window.location.pathname.replace(/\/$/, "") || "/";
       if (path !== "/dashboard/influencer") return false;
       if (document.getElementById(ROOT_ID)) return true;
-      return [...document.querySelectorAll("h1")].some(
-        (h) => h.textContent.trim() === "Edit Profile"
-      );
+      const dash = document.getElementById("influnet-influencer-dashboard-mount");
+      return [...document.querySelectorAll("h1")].some((h) => {
+        if (h.textContent.trim() !== "Edit Profile") return false;
+        return !dash?.contains(h);
+      });
     }
+
+    function authHeaders() {
+      const token = localStorage.getItem("influnet_token");
+      return token ? { Authorization: "Bearer " + token } : {};
+    }
+
+    function findHeaderEditProfileButton() {
+      const dash = document.getElementById("influnet-influencer-dashboard-mount");
+      return [...document.querySelectorAll("button")].find((b) => {
+        if (!b.textContent.includes("Edit Profile")) return false;
+        if (dash?.contains(b)) return false;
+        if (b.closest(".infl-idash-action-btn, .infl-idash-hero-social-btn")) {
+          return false;
+        }
+        return !!b.closest(".absolute.right-0.top-full");
+      });
+    }
+
+    function navigateToEditProfile() {
+      if (isEditProfilePage()) {
+        window.dispatchEvent(new CustomEvent("influnet-influencer-open-profile"));
+        return;
+      }
+      const menuBtn = document.querySelector(
+        ".flex.h-screen header .border-l.border-gray-100 button, .flex.h-screen header .pl-2.border-l button"
+      );
+      if (menuBtn) menuBtn.click();
+      const tryOpen = () => {
+        const editBtn = findHeaderEditProfileButton();
+        if (editBtn) {
+          editBtn.click();
+          window.dispatchEvent(new CustomEvent("influnet-influencer-open-profile"));
+          return true;
+        }
+        return false;
+      };
+      [80, 180, 350, 600, 900].forEach((ms) => {
+        window.setTimeout(tryOpen, ms);
+      });
+    }
+
+    window.influnetNavigateToEditProfile = function () {
+      const path = window.location.pathname.replace(/\/$/, "") || "/";
+      if (path !== "/dashboard/influencer") {
+        sessionStorage.setItem("influnet_open_edit_profile", "1");
+        window.location.href = "/dashboard/influencer";
+        return;
+      }
+      navigateToEditProfile();
+    };
 
     function getUser() {
       try {
@@ -91,6 +145,12 @@
     function nicheArray(niche) {
       if (Array.isArray(niche)) return niche.filter(Boolean);
       return [];
+    }
+
+    function parseMetric(id) {
+      const raw = document.getElementById(id)?.value;
+      const n = parseInt(String(raw ?? "").replace(/,/g, ""), 10);
+      return Number.isFinite(n) && n >= 0 ? n : 0;
     }
 
     function parseExtraLinks(raw) {
@@ -119,7 +179,10 @@
     }
 
     async function loadProfile() {
-      const res = await fetch("/api/influencer-profile/me", { credentials: "same-origin" });
+      const res = await fetch("/api/influencer-profile/me", {
+        credentials: "same-origin",
+        headers: authHeaders(),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to load profile");
       return data;
@@ -128,7 +191,10 @@
     async function saveProfile(payload) {
       const res = await fetch("/api/influencer-profile/me", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders(),
+        },
         credentials: "same-origin",
         body: JSON.stringify(payload),
       });
@@ -241,7 +307,7 @@
           </div>
           <div class="infl-edit-social-row">
             <label>IG Followers</label>
-            <input type="number" id="infl-ig-followers" min="0" value="${num(p.instagramFollowers)}" placeholder="Your entry" />
+            <input type="text" inputmode="numeric" id="infl-ig-followers" value="${num(p.instagramFollowers)}" placeholder="Your entry" />
           </div>
           <div class="infl-edit-social-row">
             <label>Facebook</label>
@@ -249,7 +315,7 @@
           </div>
           <div class="infl-edit-social-row">
             <label>FB Followers</label>
-            <input type="number" id="infl-fb-followers" min="0" value="${num(p.facebookFollowers)}" placeholder="Your entry" />
+            <input type="text" inputmode="numeric" id="infl-fb-followers" value="${num(p.facebookFollowers)}" placeholder="Your entry" />
           </div>
           <div class="infl-edit-social-row">
             <label>YouTube</label>
@@ -257,7 +323,7 @@
           </div>
           <div class="infl-edit-social-row">
             <label>YT Subscribers</label>
-            <input type="number" id="infl-yt-subs" min="0" value="${num(p.youtubeSubscribers)}" placeholder="Your entry" />
+            <input type="text" inputmode="numeric" id="infl-yt-subs" value="${num(p.youtubeSubscribers)}" placeholder="Your entry" />
           </div>
           <div class="infl-edit-social-row">
             <label>LinkedIn</label>
@@ -269,7 +335,7 @@
           </div>
           <div class="infl-edit-social-row">
             <label>TikTok Followers</label>
-            <input type="number" id="infl-tiktok-followers" min="0" value="${num(p.tiktokFollowers)}" placeholder="Your entry" />
+            <input type="text" inputmode="numeric" id="infl-tiktok-followers" value="${num(p.tiktokFollowers)}" placeholder="Your entry" />
           </div>
           <div class="infl-edit-field" style="margin-top:0.75rem">
             <label>Other Platforms</label>
@@ -309,7 +375,7 @@
           <p class="sub">Links to your work and media kit</p>
           <div class="infl-edit-field">
             <label>Media Kit URL</label>
-            <input type="url" id="infl-media-kit" value="${esc(p.mediaKitUrl || "")}" placeholder="https://..." />
+            <input type="text" id="infl-media-kit" value="${esc(p.mediaKitUrl || "")}" placeholder="https://..." />
           </div>
           <div class="infl-edit-field">
             <label>Portfolio Links (one per line)</label>
@@ -475,10 +541,10 @@
         youtubeHandle: document.getElementById("infl-yt")?.value?.trim() || null,
         linkedinHandle: document.getElementById("infl-li")?.value?.trim() || null,
         tiktokHandle: tiktokVal || null,
-        instagramFollowers: document.getElementById("infl-ig-followers")?.value || 0,
-        facebookFollowers: document.getElementById("infl-fb-followers")?.value || 0,
-        youtubeSubscribers: document.getElementById("infl-yt-subs")?.value || 0,
-        tiktokFollowers: document.getElementById("infl-tiktok-followers")?.value || 0,
+        instagramFollowers: parseMetric("infl-ig-followers"),
+        facebookFollowers: parseMetric("infl-fb-followers"),
+        youtubeSubscribers: parseMetric("infl-yt-subs"),
+        tiktokFollowers: parseMetric("infl-tiktok-followers"),
         twitterHandle: twitterExtra?.url?.trim() || null,
         extraSocialLinks: extras.length ? JSON.stringify(extras) : null,
         collabTypes: selectedCollabs,
@@ -488,8 +554,7 @@
       };
 
       try {
-        await saveProfile(payload);
-        profileData = await loadProfile();
+        profileData = await saveProfile(payload);
         showMsg("Profile saved successfully.", true);
         window.dispatchEvent(new CustomEvent("influnet-profile-updated"));
       } catch (err) {
@@ -500,11 +565,24 @@
       }
     }
 
+    function requestRemount() {
+      remountRequested = true;
+      rendered = false;
+    }
+
+    function isFormRendered() {
+      const root = document.getElementById(ROOT_ID);
+      return !!(rendered && root?.querySelector("#infl-edit-save-btn"));
+    }
+
     async function mount() {
       if (!isEditProfilePage()) {
         rendered = false;
+        remountRequested = false;
         return;
       }
+
+      window.dispatchEvent(new CustomEvent("influnet-influencer-open-profile"));
 
       const container = document.querySelector(".max-w-2xl.mx-auto");
       if (!container) return;
@@ -518,16 +596,26 @@
         else container.prepend(root);
       }
 
-      hideNativeForm(container);
+      if (isFormRendered() && !remountRequested) {
+        hideNativeForm(container);
+        return;
+      }
 
-      if (rendered && root.childElementCount) return;
+      if (mountInFlight) return;
+      mountInFlight = true;
+      remountRequested = false;
 
       try {
         profileData = await loadProfile();
+        hideNativeForm(container);
         renderForm(root, profileData);
         rendered = true;
       } catch (err) {
+        hideNativeForm(container);
         root.innerHTML = `<div class="infl-edit-msg err">${esc(err.message)}</div>`;
+        rendered = false;
+      } finally {
+        mountInFlight = false;
       }
     }
 
@@ -537,19 +625,49 @@
           "influnet-profile-edit-enhanced"
         );
         rendered = false;
+        remountRequested = false;
+        return;
+      }
+      if (isFormRendered() && !remountRequested) {
+        const container = document.querySelector(".max-w-2xl.mx-auto");
+        if (container) hideNativeForm(container);
         return;
       }
       mount();
     }
 
-    tick();
-    setInterval(tick, 2000);
-    window.addEventListener("popstate", tick);
-    window.addEventListener("load", tick);
+    function boot() {
+      tick();
+      if (sessionStorage.getItem("influnet_open_edit_profile") === "1") {
+        sessionStorage.removeItem("influnet_open_edit_profile");
+        window.setTimeout(() => window.influnetNavigateToEditProfile?.(), 400);
+      }
+    }
+
+    boot();
+    setInterval(() => {
+      if (!isEditProfilePage()) {
+        rendered = false;
+        remountRequested = false;
+        return;
+      }
+      if (!isFormRendered() || remountRequested) tick();
+    }, 2000);
+    window.addEventListener("popstate", boot);
+    window.addEventListener("load", boot);
     window.addEventListener("influnet-profile-updated", () => {
-      rendered = false;
+      requestRemount();
       tick();
     });
+
+    let editObsTimer = null;
+    const editObs = new MutationObserver(() => {
+      if (!isEditProfilePage() || isFormRendered()) return;
+      clearTimeout(editObsTimer);
+      editObsTimer = window.setTimeout(tick, 200);
+    });
+    const rootEl = document.getElementById("root");
+    if (rootEl) editObs.observe(rootEl, { childList: true, subtree: true });
   } catch (e) {
     console.warn("[influnet] influencer-profile-full-edit:", e);
   }

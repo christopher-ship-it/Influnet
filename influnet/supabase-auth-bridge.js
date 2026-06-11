@@ -617,6 +617,33 @@
     }
   }
 
+  function broadcastNotification(event) {
+    broadcastSse(event);
+    try {
+      window.dispatchEvent(new CustomEvent("influnet-notification", { detail: event }));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function getNotificationSummary() {
+    const session = await getSessionUser();
+    if (!session?.user) {
+      return { unreadMessagesCount: 0, pendingRequestsCount: 0 };
+    }
+    const user = await resolveUser(session.user);
+    const conversations = await listConversations();
+    const unreadMessagesCount = conversations.filter(
+      (c) => (c.unreadCount || 0) > 0
+    ).length;
+    const requestDir = user.role === "influencer" ? "incoming" : "outgoing";
+    const requests = await listCollabRequests(requestDir);
+    const pendingRequestsCount = requests.filter(
+      (r) => String(r.status).toLowerCase() === "pending"
+    ).length;
+    return { unreadMessagesCount, pendingRequestsCount };
+  }
+
   function formatCollabRow(row, profiles) {
     const from = profiles.get(row.from_user_id) || {
       id: row.from_user_id,
@@ -811,6 +838,15 @@
     }
     showToast("Collaboration request sent.", "ok");
     const profiles = await loadProfilesMap([data.from_user_id, data.to_user_id]);
+    const fromProfile = profiles.get(data.from_user_id);
+    broadcastNotification({
+      type: "NEW_REQUEST_RECEIVED",
+      requestId: data.id,
+      toUserId: data.to_user_id,
+      fromUserId: data.from_user_id,
+      fromName: fromProfile?.companyName || fromProfile?.name || "Business",
+      message: data.message,
+    });
     return jsonResponse(formatCollabRow(data, profiles), 201);
   }
 
@@ -864,19 +900,12 @@
     if (status === "accepted" && (await checkMessagingTables())) {
       const otherId =
         data.from_user_id === uid ? data.to_user_id : data.from_user_id;
-      try {
-        const conv = await findOrCreateConversation(otherId, { skipGate: true });
-        conversationId = conv?.id || null;
-        if (conversationId && data.message) {
-          await seedMessageIfEmpty(
-            conversationId,
-            data.from_user_id,
-            data.message
-          );
-        }
-      } catch (e) {
-        console.warn("[influnet] conversation on accept:", e.message);
-      }
+      conversationId = await ensureConversationForAcceptedCollab(
+        uid,
+        otherId,
+        data.from_user_id,
+        data.message
+      );
     }
 
     const profiles = await loadProfilesMap([data.from_user_id, data.to_user_id]);
@@ -893,9 +922,60 @@
         businessName: business?.companyName || business?.name || "Business",
         influencerName: profiles.get(data.to_user_id)?.name || "Creator",
       });
+      broadcastNotification({
+        type: "REQUEST_ACCEPTED",
+        requestId: data.id,
+        toUserId: data.to_user_id,
+        fromUserId: data.from_user_id,
+      });
+    }
+    if (status === "declined" || status === "cancelled") {
+      broadcastNotification({
+        type: "REQUEST_REJECTED",
+        requestId: data.id,
+        status,
+      });
     }
 
     return jsonResponse(formatted);
+  }
+
+  /** Ensure a 1:1 thread exists for an accepted collab; seed the original request text once. */
+  async function ensureConversationForAcceptedCollab(
+    uid,
+    otherUserId,
+    businessUserId,
+    message
+  ) {
+    if (!isUuid(uid) || !isUuid(otherUserId) || uid === otherUserId) return null;
+    const sb = await ensureClient();
+    let convId = await findSharedConversationId(uid, otherUserId);
+
+    if (!convId && cfg.useEnsureConversationRpc) {
+      const { data: rpcId, error: rpcErr } = await sb.rpc("ensure_conversation", {
+        other_user_id: otherUserId,
+      });
+      if (!rpcErr && rpcId) convId = rpcId;
+      else if (rpcErr) {
+        console.warn("[influnet] ensure_conversation:", rpcErr.message);
+      }
+    }
+
+    if (!convId) {
+      try {
+        const conv = await findOrCreateConversation(otherUserId, { skipGate: true });
+        convId = conv?.id || (await findSharedConversationId(uid, otherUserId));
+      } catch (e) {
+        console.warn("[influnet] ensure conversation:", e.message);
+        convId = await findSharedConversationId(uid, otherUserId);
+      }
+    }
+
+    const seedFrom = isUuid(businessUserId) ? businessUserId : uid;
+    if (convId && message) {
+      await seedMessageIfEmpty(convId, seedFrom, message);
+    }
+    return convId;
   }
 
   /** One conversation per accepted collab (fixes empty Messages after accept). */
@@ -907,21 +987,25 @@
     const sb = await ensureClient();
     const { data: rows, error } = await sb
       .from("collab_requests")
-      .select("from_user_id, to_user_id")
+      .select("id, from_user_id, to_user_id, message")
       .eq("status", "accepted")
       .or(`from_user_id.eq.${uid},to_user_id.eq.${uid}`);
     if (error) {
       console.warn("[influnet] collab sync for messages:", error.message);
       return;
     }
+    const seen = new Set();
     for (const row of rows || []) {
       const otherId =
         row.from_user_id === uid ? row.to_user_id : row.from_user_id;
-      try {
-        await findOrCreateConversation(otherId, { skipGate: true });
-      } catch (e) {
-        console.warn("[influnet] sync conversation:", e.message);
-      }
+      if (!otherId || seen.has(otherId)) continue;
+      seen.add(otherId);
+      await ensureConversationForAcceptedCollab(
+        uid,
+        otherId,
+        row.from_user_id,
+        row.message
+      );
     }
   }
 
@@ -1081,6 +1165,7 @@
       .from("messages")
       .select("id, body, sender_user_id, deleted, created_at")
       .eq("conversation_id", conversationId)
+      .eq("deleted", false)
       .order("created_at", { ascending: true });
     if (error) {
       console.warn("[influnet] messages:", error.message);
@@ -1091,6 +1176,11 @@
       .update({ last_read_at: new Date().toISOString() })
       .eq("conversation_id", conversationId)
       .eq("user_id", uid);
+    broadcastNotification({
+      type: "MESSAGE_READ",
+      conversationId,
+      userId: uid,
+    });
     return (data || []).map((m) => ({
       id: m.id,
       body: m.body,
@@ -1123,6 +1213,13 @@
       .from("conversations")
       .update({ updated_at: new Date().toISOString() })
       .eq("id", conversationId);
+    broadcastSse({ type: "message", conversationId });
+    broadcastNotification({
+      type: "NEW_MESSAGE_RECEIVED",
+      conversationId,
+      senderUserId: data.sender_user_id,
+      body: data.body,
+    });
     return jsonResponse({
       id: data.id,
       body: data.body,
@@ -1161,6 +1258,13 @@
       facebookHandle: m.facebookHandle ?? null,
       linkedinHandle: m.linkedinHandle ?? null,
       extraSocialLinks: formatExtraSocialLinks(m.extraSocialLinks),
+      instagramFollowers:
+        m.instagramFollowers != null ? Number(m.instagramFollowers) : null,
+      youtubeSubscribers:
+        m.youtubeSubscribers != null ? Number(m.youtubeSubscribers) : null,
+      tiktokFollowers: m.tiktokFollowers != null ? Number(m.tiktokFollowers) : null,
+      facebookFollowers:
+        m.facebookFollowers != null ? Number(m.facebookFollowers) : null,
     };
   }
 
@@ -1210,10 +1314,14 @@
       profileSlug: ip?.profile_slug ?? null,
       avatarUrl: ip?.avatar_url ?? null,
       tiktokHandle: ip?.tiktok_handle ?? null,
-      instagramFollowers: ip?.instagram_followers ?? 0,
-      youtubeSubscribers: ip?.youtube_subscribers ?? 0,
-      tiktokFollowers: ip?.tiktok_followers ?? 0,
-      facebookFollowers: ip?.facebook_followers ?? 0,
+      instagramFollowers:
+        ip?.instagram_followers != null ? Number(ip.instagram_followers) : null,
+      youtubeSubscribers:
+        ip?.youtube_subscribers != null ? Number(ip.youtube_subscribers) : null,
+      tiktokFollowers:
+        ip?.tiktok_followers != null ? Number(ip.tiktok_followers) : null,
+      facebookFollowers:
+        ip?.facebook_followers != null ? Number(ip.facebook_followers) : null,
       engagementRate:
         ip?.engagement_rate != null ? Number(ip.engagement_rate) : null,
       mediaKitUrl: ip?.media_kit_url ?? null,
@@ -1359,6 +1467,19 @@
     return display;
   }
 
+  /** Keep user-entered handles when strict URL validation would clear them. */
+  function normalizeSocialInputLenient(platform, raw) {
+    if (raw == null) return undefined;
+    const trimmed = String(raw).trim();
+    if (!trimmed) return null;
+    const normalized = normalizeSocialInput(platform, trimmed);
+    if (normalized) return normalized;
+    let s = trimmed.replace(/^https?:\/\//i, "").replace(/^www\./i, "");
+    const parts = s.split("/").filter(Boolean);
+    const last = (parts[parts.length - 1] || s).replace(/^@+/, "");
+    return last || trimmed.replace(/^@+/, "");
+  }
+
   function slugifyProfileName(name) {
     return String(name || "")
       .toLowerCase()
@@ -1496,10 +1617,16 @@
     const cards = [];
     for (const d of defs) {
       const raw = d.raw;
-      if (!raw || !String(raw).trim()) continue;
-      if (!isSocialHandleForPlatform(d.id, raw)) continue;
-      const handle = formatSocialHandle(d.id, raw);
-      if (!handle) continue;
+      const metric = d.metric != null ? Number(d.metric) : 0;
+      const hasHandle = raw && String(raw).trim();
+      const hasMetric = metric > 0;
+      if (!hasHandle && !hasMetric) continue;
+      let handle = "";
+      if (hasHandle) {
+        handle = formatSocialHandle(d.id, raw) || String(raw).trim();
+      } else {
+        handle = "—";
+      }
       cards.push({
         id: d.id,
         label: d.label,
@@ -1606,6 +1733,13 @@
           instagramHandle: fromDb.instagramHandle ?? meta.instagramHandle,
           facebookHandle: fromDb.facebookHandle ?? meta.facebookHandle,
           linkedinHandle: fromDb.linkedinHandle ?? meta.linkedinHandle,
+          instagramFollowers:
+            profile.instagramFollowers ?? meta.instagramFollowers ?? 0,
+          youtubeSubscribers:
+            profile.youtubeSubscribers ?? meta.youtubeSubscribers ?? 0,
+          tiktokFollowers: profile.tiktokFollowers ?? meta.tiktokFollowers ?? 0,
+          facebookFollowers:
+            profile.facebookFollowers ?? meta.facebookFollowers ?? 0,
         };
       }
     }
@@ -2182,6 +2316,14 @@
   }
 
   async function updateInfluencerProfileMe(body) {
+    if (
+      body?.data &&
+      typeof body.data === "object" &&
+      body.bio === undefined &&
+      body.niche === undefined
+    ) {
+      body = body.data;
+    }
     await syncSessionFromStorage();
     const session = await getSessionUser();
     if (!session?.user) {
@@ -2221,26 +2363,39 @@
       niche,
       instagramHandle:
         body.instagramHandle != null
-          ? normalizeSocialInput("instagram", body.instagramHandle)
+          ? normalizeSocialInputLenient("instagram", body.instagramHandle)
           : prev.instagramHandle ?? prevMeta.instagramHandle ?? null,
       facebookHandle:
         body.facebookHandle != null
-          ? normalizeSocialInput("facebook", body.facebookHandle)
+          ? normalizeSocialInputLenient("facebook", body.facebookHandle)
           : prev.facebookHandle ?? prevMeta.facebookHandle ?? null,
       youtubeHandle:
         body.youtubeHandle != null
-          ? normalizeSocialInput("youtube", body.youtubeHandle)
+          ? normalizeSocialInputLenient("youtube", body.youtubeHandle)
           : prev.youtubeHandle ?? prevMeta.youtubeHandle ?? null,
       linkedinHandle:
         body.linkedinHandle != null
-          ? normalizeSocialInput("linkedin", body.linkedinHandle)
+          ? normalizeSocialInputLenient("linkedin", body.linkedinHandle)
           : prev.linkedinHandle ?? prevMeta.linkedinHandle ?? null,
       twitterHandle:
         body.twitterHandle != null
-          ? normalizeSocialInput("twitter", body.twitterHandle)
+          ? normalizeSocialInputLenient("twitter", body.twitterHandle)
           : prev.twitterHandle ?? prevMeta.twitterHandle ?? null,
       extraSocialLinks: formatExtraSocialLinks(extraSocialLinks),
     };
+
+    if (body.instagramFollowers != null) {
+      meta.instagramFollowers = Math.max(0, Number(body.instagramFollowers) || 0);
+    }
+    if (body.facebookFollowers != null) {
+      meta.facebookFollowers = Math.max(0, Number(body.facebookFollowers) || 0);
+    }
+    if (body.youtubeSubscribers != null) {
+      meta.youtubeSubscribers = Math.max(0, Number(body.youtubeSubscribers) || 0);
+    }
+    if (body.tiktokFollowers != null) {
+      meta.tiktokFollowers = Math.max(0, Number(body.tiktokFollowers) || 0);
+    }
 
     const { data: authData, error: authErr } = await sb.auth.updateUser({ data: meta });
     if (authErr) {
@@ -2303,7 +2458,7 @@
         ipRow.avatar_url = String(body.avatarUrl).trim() || null;
       }
       if (body.tiktokHandle != null) {
-        ipRow.tiktok_handle = normalizeSocialInput("tiktok", body.tiktokHandle);
+        ipRow.tiktok_handle = normalizeSocialInputLenient("tiktok", body.tiktokHandle);
       }
       if (body.instagramFollowers != null) {
         ipRow.instagram_followers = Math.max(0, Number(body.instagramFollowers) || 0);
@@ -2345,8 +2500,12 @@
         onConflict: "user_id",
       });
       if (ipErr) {
-        showToast(ipErr.message);
-        return jsonResponse({ error: ipErr.message }, 400);
+        const msg = ipErr.message || "Could not save profile";
+        const hint = /column/i.test(msg)
+          ? " Run Supabase migrations 012 and 015, then try again."
+          : "";
+        showToast(msg + hint);
+        return jsonResponse({ error: msg + hint }, 400);
       }
     }
 
@@ -3195,6 +3354,10 @@
       if (!session?.user) return jsonResponse({ error: "Not authenticated" }, 401);
       await touchPresence(session.user.id);
       return jsonResponse({ ok: true, lastSeenAt: new Date().toISOString() });
+    }
+
+    if (pathname === "/api/notifications/summary" && method === "GET") {
+      return jsonResponse(await getNotificationSummary());
     }
 
     if (pathname === "/api/collab-requests/incoming" && method === "GET") {

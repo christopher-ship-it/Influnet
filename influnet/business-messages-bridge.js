@@ -62,9 +62,25 @@
 
     function trySelectConversation(displayName) {
       if (!displayName) return false;
+      const first = displayName.trim().split(/\s+/)[0].toLowerCase();
+
+      const standalone = document.getElementById("influnet-biz-msgs-standalone");
+      if (standalone && standalone.style.display !== "none") {
+        const item = [...standalone.querySelectorAll(".infl-biz-msgs-item")].find(
+          (btn) => {
+            const name =
+              btn.querySelector(".infl-biz-msgs-item-name")?.textContent || "";
+            return name.toLowerCase().includes(first);
+          }
+        );
+        if (item) {
+          item.click();
+          return true;
+        }
+      }
+
       const main = document.querySelector("main.flex-1.overflow-hidden, main.flex-1");
       if (!main) return false;
-      const first = displayName.trim().split(/\s+/)[0].toLowerCase();
       const buttons = [...main.querySelectorAll("button")];
       const match = buttons.find((btn) => {
         const text = btn.textContent.replace(/\d+/g, "").trim().toLowerCase();
@@ -125,14 +141,19 @@
       sessionStorage.setItem(PENDING_NAME_KEY, displayName || "Creator");
       sessionStorage.removeItem(PENDING_SLUG_KEY);
       navToMessages();
+      window.influnetSyncBusinessMessagesStandalone?.();
 
       let attempts = 0;
       const pick = () => {
         if (getActiveNavLabel().toLowerCase() !== "messages") return;
-        if (trySelectConversation(displayName)) return;
-        if (++attempts < 20) window.setTimeout(pick, 250);
+        window.influnetSyncBusinessMessagesStandalone?.();
+        if (trySelectConversation(displayName)) {
+          sessionStorage.removeItem(PENDING_NAME_KEY);
+          return;
+        }
+        if (++attempts < 24) window.setTimeout(pick, 300);
       };
-      window.setTimeout(pick, 300);
+      window.setTimeout(pick, 400);
     }
 
     async function openChatWithSlug(slugOrQuery) {
@@ -152,6 +173,7 @@
     }
 
     window.influnetOpenChat = openChatWithSlug;
+    window.influnetOpenBusinessChat = openChatWithUserId;
 
     function onMessageClick(ev) {
       const btn = ev.target.closest("[data-infl-message-slug]");
@@ -201,10 +223,9 @@
     window.setInterval(() => {
       if (!isBusinessDashboard()) return;
       if (getActiveNavLabel().toLowerCase() === "messages") {
-        syncMessagesView();
         tryReselectPending();
       }
-    }, 2000);
+    }, 5000);
 
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", () => {

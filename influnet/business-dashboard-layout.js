@@ -48,6 +48,10 @@
     const path = window.location.pathname.replace(/\/$/, "") || "/";
     if (path !== "/dashboard" || getUser()?.role === "influencer") return false;
     if (document.getElementById("influnet-settings-mount")?.childElementCount) return false;
+    if (window.influnetBizIsDefinitelyDashboard?.()) {
+      const hero = document.getElementById(HERO_MOUNT);
+      return !!(hero && hero.isConnected);
+    }
     if (getActiveNavLabel() !== "Dashboard") return false;
     const hero = document.getElementById(HERO_MOUNT);
     if (!hero || !hero.isConnected) return false;

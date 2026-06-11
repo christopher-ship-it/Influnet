@@ -1,0 +1,69 @@
+@import "tailwindcss";
+
+@theme {
+  --color-infl-primary: #ee3e96;
+  --color-infl-secondary: #f26e59;
+  --font-sans: Inter, system-ui, sans-serif;
+}
+
+#infl-messenger-root {
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+.infl-glass {
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px) saturate(1.4);
+  -webkit-backdrop-filter: blur(16px) saturate(1.4);
+}
+
+.dark .infl-glass {
+  background: rgba(17, 24, 39, 0.88);
+}
+
+.infl-msgs-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(238, 62, 150, 0.35) transparent;
+}
+
+.infl-icon-btn {
+  width: 2rem;
+  height: 2rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #6b7280;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.infl-icon-btn:hover {
+  background: rgba(238, 62, 150, 0.08);
+  color: #ee3e96;
+}
+
+body.infl-floating-messenger-active .influnet-biz-msgs-standalone,
+body.infl-floating-messenger-active .influnet-react-messages-root {
+  display: none !important;
+}
+
+body.infl-custom-sidebar-badges aside nav button span.bg-red-500 {
+  display: none !important;
+}
+
+body.infl-custom-sidebar-badges aside nav button span.rounded-full.bg-red-500 {
+  display: none !important;
+}
+
+aside nav button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.infl-sidebar-badge-host {
+  margin-left: auto !important;
+}

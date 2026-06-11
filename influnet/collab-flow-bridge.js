@@ -28,13 +28,33 @@
         (b) => normalizeNavText(b.textContent).toLowerCase() === "messages"
       );
       if (btn) btn.click();
+      document.body.classList.add("infl-influencer-messages-view");
+      [0, 50, 200, 500, 1000].forEach((ms) => {
+        window.setTimeout(() => window.influnetSyncInfluencerMainPanel?.(), ms);
+      });
     }
 
     function trySelectConversation(displayName) {
       if (!displayName) return false;
+      const needle = displayName.trim().split(/\s+/)[0].toLowerCase();
+
+      const standalone = document.getElementById("influnet-biz-msgs-standalone");
+      if (standalone && standalone.style.display !== "none") {
+        const item = [...standalone.querySelectorAll(".infl-biz-msgs-item")].find(
+          (btn) => {
+            const name =
+              btn.querySelector(".infl-biz-msgs-item-name")?.textContent || "";
+            return name.toLowerCase().includes(needle);
+          }
+        );
+        if (item) {
+          item.click();
+          return true;
+        }
+      }
+
       const main = document.querySelector("main.flex-1.overflow-hidden, main.flex-1");
       if (!main) return false;
-      const needle = displayName.trim().split(/\s+/)[0].toLowerCase();
       const buttons = [...main.querySelectorAll("button")];
       const match = buttons.find((btn) => {
         const text = btn.textContent.replace(/\d+/g, "").trim().toLowerCase();

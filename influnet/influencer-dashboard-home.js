@@ -6,7 +6,36 @@
     const MOUNT_ID = "influnet-influencer-dashboard-mount";
     const API = "/api/influencer/dashboard";
 
+    const SECTION_LABELS = {
+      home: "Dashboard",
+      messages: "Messages",
+      requests: "Requests",
+      projects: "Projects",
+      analytics: "Analytics",
+      subscription: "Subscription",
+      profile: "Profile",
+      settings: "Settings",
+      support: "Support",
+    };
+
+    const NAV_MAIN_LABELS = [
+      "Dashboard",
+      "Messages",
+      "Requests",
+      "Projects",
+      "Analytics",
+      "Subscription",
+    ];
+
     let lastRenderKey = "";
+    let dashboardNeedsRefresh = false;
+    let pendingNavSection = "";
+    let pendingNavUntil = 0;
+
+    function markDashboardStale() {
+      dashboardNeedsRefresh = true;
+      lastRenderKey = "";
+    }
 
     function getUser() {
       try {
@@ -30,95 +59,275 @@
 
     function getMainEl() {
       return (
-        document.querySelector(".flex.h-screen main.flex-1.overflow-y-auto") ||
-        document.querySelector("main.flex-1.overflow-y-auto")
+        document.querySelector(".flex.h-screen main.flex-1") ||
+        document.querySelector("main.flex-1")
       );
     }
 
-    function getActiveNavLabel() {
+    function getHeaderSectionLabel() {
+      const crumb = document.querySelector(
+        ".flex.h-screen header span.text-sm.font-semibold.text-gray-800, .flex.h-screen header .text-gray-800.font-semibold"
+      );
+      if (!crumb) return "";
+      return normalizeNavText(crumb.textContent);
+    }
+
+    function getActiveNavLabelFromNav() {
       const nav = document.querySelector(".flex.h-screen aside nav");
-      if (!nav) return "Dashboard";
-      const buttons = [...nav.querySelectorAll(":scope > button")];
-      const active = buttons.find(
+      if (!nav) return "";
+      const active = [...nav.querySelectorAll(":scope > button")].find(
         (b) =>
           b.classList.contains("bg-violet-100") ||
           /\bbg-violet-100\b/.test(b.className)
       );
-      if (active) return normalizeNavText(active.textContent);
-      return "Dashboard";
+      return active ? normalizeNavText(active.textContent) : "";
+    }
+
+    function rememberNavSection(label) {
+      if (!label) return;
+      pendingNavSection = label;
+      pendingNavUntil = Date.now() + 3000;
+    }
+
+    /** Nav + header both say Dashboard — beats stale Messages DOM during tab switches. */
+    function isDefinitelyDashboard() {
+      if (pendingNavSection === "Dashboard" && Date.now() < pendingNavUntil) {
+        return true;
+      }
+      const header = getHeaderSectionLabel();
+      const nav = getActiveNavLabelFromNav();
+      return header === "Dashboard" && nav === "Dashboard";
+    }
+
+    /** Prefer clicked nav + DOM over stale highlights during tab transitions. */
+    function getActiveSectionLabel() {
+      if (isDefinitelyDashboard()) return "Dashboard";
+      if (pendingNavSection && Date.now() < pendingNavUntil) {
+        return pendingNavSection;
+      }
+
+      const main = getMainEl();
+      if (main?.querySelector(".influnet-react-messages-root")) return "Messages";
+      if (isProfileSectionOpen()) return "Profile";
+
+      const header = getHeaderSectionLabel();
+      const nav = getActiveNavLabelFromNav();
+
+      if (nav && nav !== "Dashboard") return nav;
+      if (header && header !== "Dashboard") return header;
+      return header || nav || "Dashboard";
+    }
+
+    function getActiveNavLabel() {
+      return getActiveSectionLabel();
+    }
+
+    function isProfileSectionOpen() {
+      const main = getMainEl();
+      if (!main) return false;
+      const dash = document.getElementById(MOUNT_ID);
+      if (document.getElementById("influnet-profile-edit-root")) return true;
+      return [...main.querySelectorAll("h1")].some((h) => {
+        if (h.textContent.trim() !== "Edit Profile") return false;
+        return !dash?.contains(h);
+      });
     }
 
     function isHomeSectionActive() {
-      return getActiveNavLabel() === "Dashboard";
+      if (isProfileSectionOpen()) return false;
+      if (isDefinitelyDashboard()) return true;
+      if (pendingNavSection && pendingNavSection !== "Dashboard" && Date.now() < pendingNavUntil) {
+        return false;
+      }
+      const main = getMainEl();
+      if (main?.querySelector(".influnet-react-messages-root")) return false;
+      const nav = getActiveNavLabelFromNav();
+      if (nav && nav !== "Dashboard") return false;
+      const header = getHeaderSectionLabel();
+      if (header && header !== "Dashboard") return false;
+      return true;
     }
 
-    /** Show custom home only on Dashboard tab; restore React panels for Requests, etc. */
-    function syncMainPanelVisibility() {
-      if (!isInfluencerRoute()) return;
+    function forceShowReactPanels() {
       const main = getMainEl();
       if (!main) return;
-
-      const isHome = isHomeSectionActive();
-      const mount = document.getElementById(MOUNT_ID);
-      const preserved = new Set([
-        MOUNT_ID,
-        "influnet-profile-link-mount",
-        "influnet-influencer-account-mount",
-      ]);
-
+      main.style.removeProperty("visibility");
+      main.style.removeProperty("pointer-events");
       main.querySelectorAll(":scope > *").forEach((el) => {
-        if (preserved.has(el.id)) {
-          if (el.id === MOUNT_ID) {
-            if (isHome) el.style.removeProperty("display");
-            else el.style.setProperty("display", "none", "important");
-          }
-          return;
-        }
-        if (isHome) {
-          el.setAttribute("data-infl-old-dash-hidden", "1");
-          el.style.setProperty("display", "none", "important");
-        } else {
+        if (el.hasAttribute("data-infl-old-dash-hidden")) {
           el.removeAttribute("data-infl-old-dash-hidden");
+        }
+        if (el.id !== MOUNT_ID) {
           el.style.removeProperty("display");
+          el.style.removeProperty("visibility");
         }
       });
     }
 
-    function isInfluencerDashboardHome() {
-      if (!isInfluencerRoute()) return false;
-      syncMainPanelVisibility();
-      if (!isHomeSectionActive()) return false;
-      ensureDashboardMount();
-      return !!document.getElementById(MOUNT_ID);
+    /** Never .remove() — React owns this node; removing it causes removeChild errors. */
+    function hideHomeMount() {
+      const mount = document.getElementById(MOUNT_ID);
+      if (!mount) return;
+      mount.style.setProperty("display", "none", "important");
+      mount.style.setProperty("visibility", "hidden", "important");
+      mount.style.setProperty("pointer-events", "none", "important");
     }
 
-    /** Hide bundled $C home if mount patch missing (e.g. old deploy). */
-    function ensureDashboardMount() {
-      if (!isInfluencerRoute()) return null;
+    function revealHomeMount() {
+      const mount = document.getElementById(MOUNT_ID);
+      if (!mount) return;
+      mount.style.removeProperty("display");
+      mount.style.removeProperty("visibility");
+      mount.style.removeProperty("pointer-events");
+    }
 
-      let mount = document.getElementById(MOUNT_ID);
+    function isMessagesSection() {
+      if (isDefinitelyDashboard()) return false;
+      const header = getHeaderSectionLabel();
+      const nav = getActiveNavLabelFromNav();
       const main = getMainEl();
-      if (!main) return mount;
+      return (
+        getActiveSectionLabel() === "Messages" ||
+        header === "Messages" ||
+        nav === "Messages" ||
+        !!main?.querySelector(".influnet-react-messages-root")
+      );
+    }
 
-      if (!mount) {
-        mount = document.createElement("div");
-        mount.id = MOUNT_ID;
-        mount.className = "w-full";
-        main.prepend(mount);
+    function isNonDashboardTab() {
+      if (isDefinitelyDashboard()) return false;
+      const label = getActiveSectionLabel();
+      if (label !== "Dashboard") return true;
+      const header = getHeaderSectionLabel();
+      const nav = getActiveNavLabelFromNav();
+      if (header && header !== "Dashboard") return true;
+      if (nav && nav !== "Dashboard") return true;
+      return false;
+    }
+
+    function restoreHomeDashboardOverlay() {
+      if (!isInfluencerRoute()) return;
+      document.body.classList.remove("infl-influencer-messages-view");
+      revealHomeMount();
+      const mount = document.getElementById(MOUNT_ID);
+      if (!mount) return;
+      mount.querySelectorAll(".infl-idash, [data-infl-dashboard], .infl-idash-loading").forEach((el) => {
+        el.style.removeProperty("display");
+        el.style.removeProperty("visibility");
+        el.style.removeProperty("pointer-events");
+      });
+    }
+
+    function ensureDashboardContent() {
+      if (!isHomeSectionActive()) return;
+      restoreHomeDashboardOverlay();
+      const mount = document.getElementById(MOUNT_ID);
+      if (!mount || !getMainEl()?.contains(mount)) return;
+      const empty = !mount.querySelector("[data-infl-dashboard]");
+      if (dashboardNeedsRefresh || (empty && mount.dataset.loading !== "1")) {
+        loadDashboard();
       }
+    }
 
-      syncMainPanelVisibility();
-      return mount;
+    /**
+     * Header/nav can say Messages while stale .infl-idash home HTML is still visible.
+     * Hide the custom home overlay whenever any non-Dashboard tab is active.
+     */
+    function suppressHomeDashboardOverlay() {
+      if (!isInfluencerRoute()) return;
+      const main = getMainEl();
+      const onMessages = isMessagesSection();
+      const onNonDashboard = isNonDashboardTab() || onMessages;
+
+      document.body.classList.toggle("infl-influencer-messages-view", onMessages);
+
+      if (!onNonDashboard) return;
+
+      hideHomeMount();
+      main?.querySelectorAll(".infl-idash, [data-infl-dashboard]").forEach((el) => {
+        el.style.setProperty("display", "none", "important");
+        el.style.setProperty("visibility", "hidden", "important");
+        el.style.setProperty("pointer-events", "none", "important");
+      });
+      forceShowReactPanels();
+    }
+
+    /**
+     * Custom home mount only on Dashboard tab.
+     */
+    function syncMainPanelVisibility() {
+      if (!isInfluencerRoute()) return;
+      if (isHomeSectionActive()) {
+        ensureDashboardContent();
+      } else {
+        suppressHomeDashboardOverlay();
+      }
+    }
+
+    function onInfluencerSectionChange(sectionId) {
+      if (!isInfluencerRoute()) return;
+      const label = SECTION_LABELS[sectionId] || sectionId;
+      rememberNavSection(label);
+      if (sectionId === "home") {
+        markDashboardStale();
+        [0, 50, 150, 350, 600].forEach((ms) => {
+          window.setTimeout(ensureDashboardContent, ms);
+        });
+      } else {
+        suppressHomeDashboardOverlay();
+      }
+      schedulePanelSync();
+    }
+
+    window.influnetSyncInfluencerMainPanel = syncMainPanelVisibility;
+    window.influnetOnInfluencerSectionChange = onInfluencerSectionChange;
+
+    function isInfluencerDashboardHome() {
+      if (!isInfluencerRoute() || !isHomeSectionActive()) return false;
+      const main = getMainEl();
+      const mount = document.getElementById(MOUNT_ID);
+      return !!(mount && main?.contains(mount));
+    }
+
+    function schedulePanelSync() {
+      [0, 50, 150, 350, 600, 1000].forEach((ms) => {
+        window.setTimeout(syncMainPanelVisibility, ms);
+      });
+    }
+
+    function labelFromNavButton(btn) {
+      if (!btn) return "";
+      const label = normalizeNavText(btn.textContent);
+      if (label) return label;
+      const nav = btn.closest("aside nav");
+      if (!nav) return "";
+      const buttons = [...nav.querySelectorAll(":scope > button")];
+      const idx = buttons.indexOf(btn);
+      return idx >= 0 ? NAV_MAIN_LABELS[idx] || "" : "";
+    }
+
+    function onNavClick(e) {
+      const btn = e.target.closest?.("button");
+      const label = labelFromNavButton(btn);
+      if (!label) return;
+      rememberNavSection(label);
+      if (label === "Dashboard") {
+        [0, 50, 150, 350].forEach((ms) => {
+          window.setTimeout(ensureDashboardContent, ms);
+        });
+      } else {
+        suppressHomeDashboardOverlay();
+      }
+      schedulePanelSync();
     }
 
     function wireNavSync() {
       const nav = document.querySelector(".flex.h-screen aside nav");
       if (!nav || nav.dataset.inflNavSync) return;
       nav.dataset.inflNavSync = "1";
-      nav.addEventListener("click", () => {
-        window.setTimeout(syncMainPanelVisibility, 0);
-        window.setTimeout(syncMainPanelVisibility, 80);
-      });
+      nav.addEventListener("click", onNavClick, true);
+      const footer = nav.parentElement?.querySelector(":scope > div:last-of-type");
+      footer?.addEventListener("click", onNavClick, true);
     }
 
     function escapeHtml(str) {
@@ -170,23 +379,41 @@
     }
 
     function navToSection(label) {
-      const target = normalizeNavText(label).toLowerCase();
+      const section = normalizeNavText(label);
+      rememberNavSection(section);
+      const target = section.toLowerCase();
       const btn = [...document.querySelectorAll("aside nav button")].find(
         (b) => normalizeNavText(b.textContent).toLowerCase() === target
       );
       if (btn) {
         btn.click();
-        window.setTimeout(syncMainPanelVisibility, 0);
-        window.setTimeout(syncMainPanelVisibility, 80);
+        if (target !== "dashboard") {
+          hideHomeMount();
+          forceShowReactPanels();
+          document.body.classList.toggle("infl-influencer-messages-view", target === "messages");
+        }
+        schedulePanelSync();
       }
     }
 
     function goToProfile() {
-      const btn = [...document.querySelectorAll("button")].find(
-        (b) => b.textContent.trim() === "Edit Profile"
+      onInfluencerSectionChange("profile");
+      if (typeof window.influnetNavigateToEditProfile === "function") {
+        window.influnetNavigateToEditProfile();
+        return;
+      }
+      const dash = document.getElementById(MOUNT_ID);
+      const menuBtn = document.querySelector(
+        ".flex.h-screen header .border-l.border-gray-100 button"
       );
-      if (btn) btn.click();
-      else navToSection("Settings");
+      if (menuBtn) menuBtn.click();
+      window.setTimeout(() => {
+        const editBtn = [...document.querySelectorAll("button")].find((b) => {
+          if (!b.textContent.includes("Edit Profile")) return false;
+          return !dash?.contains(b);
+        });
+        editBtn?.click();
+      }, 150);
     }
 
     function trackLinkClick(slug) {
@@ -550,8 +777,10 @@
     }
 
     async function loadDashboard() {
+      if (!isHomeSectionActive()) return;
       const mount = document.getElementById(MOUNT_ID);
-      if (!mount) return;
+      if (!mount || !getMainEl()?.contains(mount)) return;
+      if (!isHomeSectionActive()) return;
 
       const key = `${getUser()?.id || ""}:${mount.childElementCount}`;
       if (mount.dataset.loading === "1" && key === lastRenderKey) return;
@@ -571,36 +800,69 @@
           stats: data.stats,
           requests: (data.requests || []).length,
           percent: data.completion?.percent,
+          social: data.socialPlatforms,
+          profile: {
+            bio: data.profile?.bio,
+            location: data.profile?.location,
+            niche: data.profile?.niche,
+            instagramFollowers: data.profile?.instagramFollowers,
+            facebookFollowers: data.profile?.facebookFollowers,
+            youtubeSubscribers: data.profile?.youtubeSubscribers,
+            tiktokFollowers: data.profile?.tiktokFollowers,
+          },
         });
-        if (renderKey === lastRenderKey && mount.querySelector("[data-infl-dashboard]")) {
+        if (
+          !dashboardNeedsRefresh &&
+          renderKey === lastRenderKey &&
+          mount.querySelector("[data-infl-dashboard]")
+        ) {
+          mount.dataset.loading = "0";
+          return;
+        }
+        if (!isHomeSectionActive()) {
           mount.dataset.loading = "0";
           return;
         }
         lastRenderKey = renderKey;
+        dashboardNeedsRefresh = false;
 
         mount.innerHTML = buildHtml(data);
+        if (!isHomeSectionActive()) {
+          mount.innerHTML = "";
+          hideHomeMount();
+          mount.dataset.loading = "0";
+          return;
+        }
         wireActions(mount, data);
       } catch (err) {
-        mount.innerHTML = `<div class="infl-idash-loading">Could not load dashboard. ${escapeHtml(err.message)}</div>`;
+        if (isHomeSectionActive()) {
+          mount.innerHTML = `<div class="infl-idash-loading">Could not load dashboard. ${escapeHtml(err.message)}</div>`;
+        }
       }
       mount.dataset.loading = "0";
     }
 
     function tick() {
       wireNavSync();
-      syncMainPanelVisibility();
-      if (!isInfluencerDashboardHome()) return;
-      loadDashboard();
+      if (isHomeSectionActive()) {
+        ensureDashboardContent();
+      } else {
+        suppressHomeDashboardOverlay();
+      }
     }
 
     window.addEventListener("influnet-profile-updated", () => {
-      lastRenderKey = "";
+      markDashboardStale();
       tick();
     });
 
     window.addEventListener("influnet-user-updated", () => {
-      lastRenderKey = "";
+      markDashboardStale();
       tick();
+    });
+
+    window.addEventListener("influnet-influencer-open-profile", () => {
+      onInfluencerSectionChange("profile");
     });
 
     tick();

@@ -79,6 +79,9 @@
     const path = window.location.pathname.replace(/\/$/, "") || "/";
     if (path !== "/dashboard" || !isBusinessUser()) return false;
     if (document.getElementById("influnet-settings-mount")?.childElementCount) return false;
+    if (typeof window.influnetBizIsDashboardHome === "function") {
+      return window.influnetBizIsDashboardHome();
+    }
     return getActiveNavLabel() === "Dashboard";
   }
 
@@ -87,11 +90,17 @@
     const path = window.location.pathname.replace(/\/$/, "") || "/";
     if (path !== "/dashboard" || !isBusinessUser()) return false;
     if (document.getElementById("influnet-settings-mount")?.childElementCount) return false;
+    if (window.influnetBizIsDefinitelyDashboard?.()) {
+      return !!document.getElementById(HERO_MOUNT);
+    }
     if (getActiveNavLabel() !== "Dashboard") return false;
     return !!document.getElementById(HERO_MOUNT);
   }
 
   function isMessagesTabActive() {
+    if (typeof window.influnetBizIsMessagesTab === "function") {
+      return window.influnetBizIsMessagesTab();
+    }
     return getActiveNavLabel().toLowerCase() === "messages";
   }
 

@@ -2,10 +2,11 @@
  * Load influencer dashboard scripts only on /dashboard/influencer.
  */
 (function () {
-  const HOME = "/influencer-dashboard-home.js?v=7";
+  const HOME = "/influencer-dashboard-home.js?v=18";
   const CLEANUP = "/influencer-dashboard-cleanup.js?v=2";
-  const COLLAB_FLOW = "/collab-flow-bridge.js?v=1";
-  const PRESENCE = "/messages-presence-bridge.js?v=1";
+  const MSG_GUARD = "/business-dashboard-messages-guard.js?v=5";
+  const COLLAB_FLOW = "/collab-flow-bridge.js?v=2";
+  const PRESENCE = "/messages-presence-bridge.js?v=2";
 
   function isInfluencerDashboard() {
     const path = window.location.pathname.replace(/\/$/, "") || "/";
@@ -31,6 +32,7 @@
   function boot() {
     if (!isInfluencerDashboard()) return;
     loadOnce(CLEANUP);
+    loadOnce(MSG_GUARD);
     loadOnce(HOME);
     loadOnce(COLLAB_FLOW);
     loadOnce(PRESENCE);

@@ -66,3 +66,4 @@ END;
 $$;
 
 GRANT EXECUTE ON FUNCTION public.get_public_influencer(TEXT) TO anon, authenticated;
+s

@@ -630,19 +630,13 @@
 
       e.preventDefault();
 
+      if (typeof window.influnetNavigateToEditProfile === "function") {
+        window.influnetNavigateToEditProfile();
+        return;
+      }
+
+      sessionStorage.setItem("influnet_open_edit_profile", "1");
       window.location.href = "/dashboard/influencer";
-
-      setTimeout(() => {
-
-        const btn = [...document.querySelectorAll("button")].find(
-
-          (b) => b.textContent.trim() === "Edit Profile"
-
-        );
-
-        btn?.click();
-
-      }, 800);
 
     });
 
