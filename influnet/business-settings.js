@@ -191,10 +191,27 @@
     }
 
     const isBusiness =
-      user?.role === "business_owner" || !user?.role || user?.role === "business";
+      user?.role === "business_owner" ||
+      normalizeUserRole(user?.role) === "business_owner";
     if (!isBusiness) {
       root.innerHTML =
         '<div class="max-w-2xl mx-auto p-6 text-sm text-gray-500">Settings are only available for business accounts.</div>';
+      return;
+    }
+
+    try {
+      const profileData = await api("/api/business-profile/me", "GET");
+      if (profileData && typeof profileData === "object") {
+        user = { ...user, ...profileData };
+      }
+    } catch (_) {
+      /* use cached user */
+    }
+
+    if (window.InflProfileSettings?.mount) {
+      root.innerHTML = "";
+      root.className = "";
+      await window.InflProfileSettings.mount(root, user, { role: "business" });
       return;
     }
 
@@ -249,7 +266,10 @@
         required: true,
       })
     );
-    account.appendChild(field("Phone", "phone", "tel", user?.phone));
+    const phoneLocal = String(user?.phone || "")
+      .replace(/\D/g, "")
+      .slice(-10);
+    account.appendChild(field("Phone", "infl-phone", "tel", phoneLocal));
     const emailNote = document.createElement("p");
     emailNote.className = "sm:col-span-2 text-xs text-gray-500";
     emailNote.innerHTML = `Work email: <strong>${user?.email || "—"}</strong> — change below in Email &amp; password.`;
@@ -312,6 +332,12 @@
     );
 
     const verify = section("Verification & address");
+    if (user?.phoneVerified) {
+      const mobileBadge = document.createElement("p");
+      mobileBadge.className = "sm:col-span-2 infl-bdash-verified-mobile";
+      mobileBadge.textContent = "✓ Verified Mobile";
+      verify.appendChild(mobileBadge);
+    }
     verify.appendChild(
       field("GST number", "gstNumber", "text", user?.gstNumber, { optional: true })
     );
@@ -388,10 +414,29 @@
           throw new Error("Please enter your budget amount.");
         }
 
+        const phoneDigits = String(fd.get("infl-phone") || "")
+          .replace(/\D/g, "")
+          .slice(-10);
+        const prevDigits = String(user?.phone || "")
+          .replace(/\D/g, "")
+          .slice(-10);
+        if (phoneDigits.length === 10 && phoneDigits !== prevDigits) {
+          const otp = window.influnetPhoneOtpState?.();
+          if (
+            !otp?.verificationToken ||
+            otp.status !== "verified" ||
+            otp.phoneLocal !== phoneDigits
+          ) {
+            throw new Error("Verify your new mobile number with OTP before saving.");
+          }
+        } else if (phoneDigits.length > 0 && phoneDigits.length !== 10) {
+          throw new Error("Enter a valid 10-digit mobile number.");
+        }
+
         const payload = {
           name: fd.get("name"),
           companyName: fd.get("companyName"),
-          phone: fd.get("phone"),
+          phone: phoneDigits.length === 10 ? `+91 ${phoneDigits}` : null,
           businessType:
             businessTypeSelect === "Other"
               ? businessTypeCustom
@@ -408,11 +453,14 @@
           registeredAddress: fd.get("registeredAddress"),
           marketingBudget:
             budgetSelect === "Other" ? budgetCustom : budgetSelect || budgetCustom,
-          collabPreferences: ["influencers"],
+          collabPreferences: Array.isArray(user?.collabPreferences)
+            ? user.collabPreferences
+            : [],
         };
 
-        const data = await api("/api/auth/me", "PATCH", payload);
-        applyUser(data.user, data.token);
+        const data = await api("/api/business-profile/me", "PATCH", payload);
+        const nextUser = data.profile || data.user || data;
+        if (nextUser) applyUser(nextUser, data.token);
         showMsg("Profile saved successfully.", true);
         delete root.dataset.rendered;
         renderSettings(root);

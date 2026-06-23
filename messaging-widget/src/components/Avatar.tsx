@@ -8,7 +8,7 @@ type Props = {
 };
 
 export function Avatar({ user, size = 40, className = "" }: Props) {
-  const name = displayName(user || undefined);
+  const name = displayName(user || undefined) || user?.username || "?";
   const px = size;
   if (user?.avatarUrl) {
     return (

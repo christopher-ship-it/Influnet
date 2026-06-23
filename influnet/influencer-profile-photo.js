@@ -98,6 +98,9 @@
 
     function wireSignupFileInput() {
       if (!isSignupPage()) return;
+      if (window.__inflSignupPhotoModuleLoaded) return;
+      if (document.querySelector(".isd-photo-block")) return;
+      if (window.influnetSignupPhoto?.hasPhoto?.()) return;
       document.querySelectorAll('input[type="file"]').forEach((input) => {
         if (input.dataset.inflPhotoWired === "1") return;
         input.dataset.inflPhotoWired = "1";
@@ -117,7 +120,9 @@
     }
 
     async function uploadPendingAfterSignup() {
-      if (!pendingFile || uploading) return;
+      const file = pendingFile || window.__inflSignupPhotoFile || window.influnetSignupPhoto?.getFile?.();
+      if (!file || uploading) return;
+      pendingFile = file;
       uploading = true;
       setSignupStatus("Uploading profile photo…", "uploading");
       try {
@@ -133,6 +138,7 @@
 
     function hookRegisterUpload() {
       if (window.__inflPhotoFetchHooked) return;
+      if (window.__inflSignupPhotoRegisterHooked) return;
       window.__inflPhotoFetchHooked = true;
       const prev = window.fetch.bind(window);
       window.fetch = async function (input, init) {

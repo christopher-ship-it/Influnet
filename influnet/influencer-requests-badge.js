@@ -50,6 +50,9 @@
     function isSidebarCollapsed(btn) {
       const aside = btn?.closest("aside");
       if (!aside) return false;
+      if (aside.classList.contains("infl-sidebar-hover")) {
+        return aside.classList.contains("infl-sidebar-hover--compact");
+      }
       return aside.classList.contains("w-16") || aside.offsetWidth < 100;
     }
 
@@ -134,6 +137,7 @@
     window.addEventListener("focus", refresh);
     window.addEventListener("load", boot);
     window.addEventListener("popstate", boot);
+    window.addEventListener("infl-sidebar-hover-change", onNavMutate);
     boot();
     setInterval(boot, 3000);
   } catch (e) {

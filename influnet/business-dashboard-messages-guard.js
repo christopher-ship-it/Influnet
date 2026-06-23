@@ -77,7 +77,8 @@
         "Dashboard",
         "Messages",
         "Requests",
-        "Collaborations",
+        "Connections",
+        "Projects",
         "Saved Creators",
         "Analytics",
         "Invoices",
@@ -115,6 +116,27 @@
       return isDefinitelyDashboard() || getActiveNavLabel() === "Dashboard";
     }
 
+    function syncMessagesHeaderCrumb(hide) {
+      const header = document.querySelector(
+        ".flex.h-screen > .flex-1.flex.flex-col.min-w-0 > header"
+      );
+      if (!header) return;
+      header
+        .querySelectorAll(
+          "span.text-sm, .text-gray-800.font-semibold, .text-gray-800.font-medium"
+        )
+        .forEach((el) => {
+          if (el.closest(".flex.items-center")) return;
+          if (hide) {
+            el.setAttribute("data-infl-hide-section-crumb", "1");
+            el.style.setProperty("display", "none", "important");
+          } else if (el.hasAttribute("data-infl-hide-section-crumb")) {
+            el.removeAttribute("data-infl-hide-section-crumb");
+            el.style.removeProperty("display");
+          }
+        });
+    }
+
     function guard() {
       if (isInfluencerDashboard()) {
         document.body.classList.remove("infl-business-messages-view");
@@ -122,17 +144,20 @@
           getActiveNavLabel().toLowerCase() === "messages" ||
           !!document.querySelector(".influnet-react-messages-root");
         document.body.classList.toggle("infl-influencer-messages-view", onMessages);
+        syncMessagesHeaderCrumb(onMessages);
         if (onMessages) window.influnetSyncInfluencerMainPanel?.();
         return;
       }
       if (!isBusinessDashboard()) {
         document.body.classList.remove("infl-business-messages-view");
         document.body.classList.remove("infl-influencer-messages-view");
+        syncMessagesHeaderCrumb(false);
         return;
       }
       document.body.classList.remove("infl-influencer-messages-view");
       const onMessages = isMessagesTab();
       document.body.classList.toggle("infl-business-messages-view", onMessages);
+      syncMessagesHeaderCrumb(onMessages);
       if (onMessages) {
         document.querySelectorAll("header .influnet-dash-greeting").forEach((el) => {
           el.remove();
@@ -141,6 +166,7 @@
       } else {
         window.influnetHideBusinessMessagesStandalone?.();
         window.influnetSyncBusinessDashboardShell?.();
+        window.influnetSyncBusinessDashboardLayout?.(true);
       }
     }
 
@@ -148,7 +174,8 @@
       home: "Dashboard",
       messages: "Messages",
       requests: "Requests",
-      projects: "Collaborations",
+      connections: "Connections",
+      projects: "Projects",
       saved: "Saved Creators",
       analytics: "Analytics",
       subscription: "Invoices",
@@ -164,7 +191,10 @@
         document.body.classList.remove("infl-business-messages-view");
         window.influnetHideBusinessMessagesStandalone?.();
         [0, 50, 150, 350, 600].forEach((ms) => {
-          window.setTimeout(() => window.influnetSyncBusinessDashboardShell?.(), ms);
+          window.setTimeout(() => {
+            window.influnetSyncBusinessDashboardShell?.();
+            window.influnetSyncBusinessDashboardLayout?.(true);
+          }, ms);
         });
       } else if (sectionId === "messages") {
         [0, 50, 150, 350].forEach((ms) => {
@@ -183,11 +213,15 @@
         const label = labelFromNavButton(btn);
         if (!label) return;
         rememberNavSection(label);
+        window.dispatchEvent(new CustomEvent("influnet-nav-changed"));
         [0, 80, 200, 450, 900].forEach((ms) => window.setTimeout(guard, ms));
         if (label === "Dashboard") {
           window.influnetHideBusinessMessagesStandalone?.();
           [0, 50, 150, 350].forEach((ms) => {
-            window.setTimeout(() => window.influnetSyncBusinessDashboardShell?.(), ms);
+            window.setTimeout(() => {
+              window.influnetSyncBusinessDashboardShell?.();
+              window.influnetSyncBusinessDashboardLayout?.(true);
+            }, ms);
           });
         } else if (label === "Messages") {
           [0, 50, 150, 350].forEach((ms) => {
@@ -204,7 +238,13 @@
     window.influnetBizIsDefinitelyDashboard = isDefinitelyDashboard;
     window.influnetBizIsMessagesTab = isMessagesTab;
     window.influnetBizIsDashboardHome = isDashboardHomeTab;
-    window.influnetOnBusinessSectionChange = onBusinessSectionChange;
+    (function chainBizSectionHook(handler) {
+      const prev = window.influnetOnBusinessSectionChange;
+      window.influnetOnBusinessSectionChange = function (sectionId) {
+        if (typeof prev === "function") prev(sectionId);
+        handler(sectionId);
+      };
+    })(onBusinessSectionChange);
     window.influnetGuardBusinessMessages = guard;
 
     wireNav();

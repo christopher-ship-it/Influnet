@@ -39,7 +39,9 @@ window.addEventListener("influnet-messenger-notify", ((e: Event) => {
   () => {
     mount();
     import("./store/messagingStore").then(({ useMessagingStore }) => {
-      useMessagingStore.getState().setPanelExpanded(true);
-      useMessagingStore.getState().loadConversations();
+      const store = useMessagingStore.getState();
+      store.clearSelectedConversation();
+      store.setPanelExpanded(true);
+      store.loadConversations();
     });
   };

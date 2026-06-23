@@ -7,14 +7,11 @@ export function NotificationToastStack() {
   const toasts = useNotificationStore((s) => s.toasts);
   const dismissToast = useNotificationStore((s) => s.dismissToast);
   const openChat = useMessagingStore((s) => s.openChat);
-  const setPanelExpanded = useMessagingStore((s) => s.setPanelExpanded);
 
   const handleAction = (t: (typeof toasts)[0]) => {
     if (t.kind === "message" && t.conversationId) {
       window.influnetOpenFloatingMessenger?.();
       openChat(t.conversationId);
-      setPanelExpanded(false);
-      window.dispatchEvent(new CustomEvent("influnet-messenger-chat-opened"));
     }
     if (t.kind === "collab" || t.kind === "response") {
       openNavSection("requests");
@@ -32,7 +29,7 @@ export function NotificationToastStack() {
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 20, scale: 0.95 }}
             transition={{ type: "spring", stiffness: 400, damping: 28 }}
-            className="pointer-events-auto p-3.5 rounded-2xl infl-glass border border-white/70 dark:border-gray-700 shadow-xl bg-white/95 dark:bg-gray-900/95"
+            className="pointer-events-auto p-3.5 rounded-2xl border border-[#e5e7eb] dark:border-gray-700 shadow-xl bg-white dark:bg-gray-900"
           >
             <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 m-0">
               {t.title}

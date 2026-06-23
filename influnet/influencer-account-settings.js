@@ -1,9 +1,13 @@
 /**
  * Email + password settings on the influencer Edit Profile page.
- * Mounts into #influnet-influencer-account-mount (injected in the profile view).
  */
 (function () {
   const MOUNT_ID = "influnet-influencer-account-mount";
+
+  const ICON = {
+    key: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>',
+    mail: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>',
+  };
 
   function getStoredUser() {
     try {
@@ -36,25 +40,8 @@
     return data;
   }
 
-  function field(label, id, type, value, opts) {
-    const wrap = document.createElement("div");
-    wrap.className = "space-y-1";
-    const lbl = document.createElement("label");
-    lbl.className = "text-sm font-medium text-gray-700";
-    lbl.htmlFor = id;
-    lbl.textContent = label;
-    const input = document.createElement("input");
-    input.id = id;
-    input.name = id;
-    input.type = type || "text";
-    input.value = value ?? "";
-    input.className =
-      "w-full h-10 px-3 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-violet-400/30 focus:border-violet-400";
-    if (opts?.placeholder) input.placeholder = opts.placeholder;
-    if (opts?.required) input.required = true;
-    wrap.appendChild(lbl);
-    wrap.appendChild(input);
-    return wrap;
+  function refField(label, inputHtml, full) {
+    return `<div class="infl-ref-field${full ? " infl-ref-field--full" : ""}"><label class="infl-ref-label">${label}</label>${inputHtml}</div>`;
   }
 
   async function renderAccountSettings(root) {
@@ -72,111 +59,86 @@
       /* use cached user */
     }
 
-    root.innerHTML = "";
-    const wrap = document.createElement("div");
-    wrap.className = "space-y-6";
+    root.innerHTML = `
+      <div id="influnet-influencer-account-msg" class="infl-ref-msg" style="display:none"></div>
 
-    const msg = document.createElement("div");
-    msg.id = "influnet-influencer-account-msg";
-    msg.className = "hidden text-sm rounded-xl px-4 py-3";
-    wrap.appendChild(msg);
+      <section class="infl-ref-card">
+        <div class="infl-ref-card-head">
+          <div class="infl-ref-card-icon infl-ref-card-icon--blue">${ICON.mail}</div>
+          <div class="infl-ref-card-titles">
+            <h3>Email address</h3>
+            <p>Update the email you use to sign in to Influnet.</p>
+          </div>
+        </div>
+        <form id="infl-account-email-form" class="infl-ref-grid infl-ref-grid--single">
+          ${refField(`New email <span style="font-weight:400;text-transform:none;letter-spacing:0">(current: ${user?.email || "—"})</span>`, `<input id="infl-account-email" type="email" value="${user?.email || ""}" required />`, true)}
+          ${refField("Current password (to confirm)", `<input id="infl-account-email-pw" type="password" required />`, true)}
+          <div class="infl-ref-field infl-ref-field--full">
+            <button type="submit" class="infl-ref-btn" id="infl-account-email-btn">Update email</button>
+          </div>
+        </form>
+      </section>
 
+      <section class="infl-ref-card">
+        <div class="infl-ref-card-head">
+          <div class="infl-ref-card-icon infl-ref-card-icon--slate">${ICON.key}</div>
+          <div class="infl-ref-card-titles">
+            <h3>Password</h3>
+            <p>Set or change your sign-in password.</p>
+          </div>
+        </div>
+        <form id="infl-account-pass-form" class="infl-ref-grid">
+          ${refField("Current password", `<input id="infl-account-current-pw" type="password" required />`, false)}
+          ${refField("New password", `<input id="infl-account-new-pw" type="password" placeholder="At least 6 characters" required />`, false)}
+          <div class="infl-ref-field infl-ref-field--full">
+            <button type="submit" class="infl-ref-btn" id="infl-account-pass-btn">Change password</button>
+          </div>
+        </form>
+      </section>`;
+
+    const msg = root.querySelector("#influnet-influencer-account-msg");
     function showMsg(text, ok) {
+      if (!msg) return;
+      msg.style.display = "block";
       msg.textContent = text;
-      msg.className = ok
-        ? "text-sm rounded-xl px-4 py-3 bg-green-50 text-green-800 border border-green-100"
-        : "text-sm rounded-xl px-4 py-3 bg-red-50 text-red-800 border border-red-100";
+      msg.className = `infl-ref-msg ${ok ? "ok" : "err"}`;
     }
 
-    const emailCard = document.createElement("div");
-    emailCard.className =
-      "bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4";
-    emailCard.innerHTML =
-      '<h2 class="text-lg font-semibold text-gray-900">Email address</h2><p class="text-xs text-gray-500">Current: ' +
-      (user?.email || "—") +
-      "</p>";
-    const emailForm = document.createElement("form");
-    emailForm.className = "space-y-4";
-    emailForm.appendChild(
-      field("New email", "email", "email", user?.email, { required: true })
-    );
-    emailForm.appendChild(
-      field("Current password (to confirm)", "password", "password", "", {
-        required: true,
-      })
-    );
-    const emailBtn = document.createElement("button");
-    emailBtn.type = "submit";
-    emailBtn.className =
-      "bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50";
-    emailBtn.textContent = "Update email";
-    emailForm.appendChild(emailBtn);
-    emailForm.addEventListener("submit", async (e) => {
+    root.querySelector("#infl-account-email-form")?.addEventListener("submit", async (e) => {
       e.preventDefault();
-      emailBtn.disabled = true;
+      const btn = root.querySelector("#infl-account-email-btn");
+      btn.disabled = true;
       try {
-        const fd = new FormData(emailForm);
         const data = await api("/api/auth/update-email", "POST", {
-          email: fd.get("email"),
-          password: fd.get("password"),
+          email: root.querySelector("#infl-account-email").value,
+          password: root.querySelector("#infl-account-email-pw").value,
         });
         if (data.user) applyUser(data.user, data.token);
-        showMsg(
-          "Email updated. If Supabase sent a confirmation link, click it to finish.",
-          true
-        );
+        showMsg("Email update initiated. Check your inbox if confirmation is required.", true);
       } catch (err) {
         showMsg(err.message, false);
       } finally {
-        emailBtn.disabled = false;
+        btn.disabled = false;
       }
     });
-    emailCard.appendChild(emailForm);
-    wrap.appendChild(emailCard);
 
-    const passCard = document.createElement("div");
-    passCard.className =
-      "bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-4";
-    passCard.innerHTML =
-      '<h2 class="text-lg font-semibold text-gray-900">Change password</h2>';
-    const passForm = document.createElement("form");
-    passForm.className = "space-y-4";
-    passForm.appendChild(
-      field("Current password", "currentPassword", "password", "", { required: true })
-    );
-    passForm.appendChild(
-      field("New password", "newPassword", "password", "", {
-        required: true,
-        placeholder: "At least 6 characters",
-      })
-    );
-    const passBtn = document.createElement("button");
-    passBtn.type = "submit";
-    passBtn.className =
-      "bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition-colors disabled:opacity-50";
-    passBtn.textContent = "Change password";
-    passForm.appendChild(passBtn);
-    passForm.addEventListener("submit", async (e) => {
+    root.querySelector("#infl-account-pass-form")?.addEventListener("submit", async (e) => {
       e.preventDefault();
-      passBtn.disabled = true;
+      const btn = root.querySelector("#infl-account-pass-btn");
+      btn.disabled = true;
       try {
-        const fd = new FormData(passForm);
         await api("/api/auth/change-password", "POST", {
-          currentPassword: fd.get("currentPassword"),
-          newPassword: fd.get("newPassword"),
+          currentPassword: root.querySelector("#infl-account-current-pw").value,
+          newPassword: root.querySelector("#infl-account-new-pw").value,
         });
-        passForm.reset();
+        root.querySelector("#infl-account-pass-form").reset();
         showMsg("Password changed successfully.", true);
       } catch (err) {
         showMsg(err.message, false);
       } finally {
-        passBtn.disabled = false;
+        btn.disabled = false;
       }
     });
-    passCard.appendChild(passForm);
-    wrap.appendChild(passCard);
-
-    root.appendChild(wrap);
   }
 
   function tryMount() {

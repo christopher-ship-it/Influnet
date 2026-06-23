@@ -3,12 +3,15 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import { resolve } from "path";
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
   plugins: [react(), tailwindcss()],
-  define: {
-    "process.env.NODE_ENV": JSON.stringify("production"),
-    "process.env": JSON.stringify({ NODE_ENV: "production" }),
-  },
+  define:
+    mode === "production"
+      ? {
+          "process.env.NODE_ENV": JSON.stringify("production"),
+          "process.env": JSON.stringify({ NODE_ENV: "production" }),
+        }
+      : {},
   build: {
     outDir: resolve(__dirname, "../influnet/messaging"),
     emptyOutDir: true,
@@ -25,5 +28,10 @@ export default defineConfig({
       },
     },
     cssCodeSplit: false,
+    sourcemap: mode === "development",
   },
-});
+  server: {
+    port: 5174,
+    open: "/index.html",
+  },
+}));

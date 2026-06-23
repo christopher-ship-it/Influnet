@@ -110,6 +110,18 @@ export function useNotificationRealtime() {
         }
       }
 
+      if (detail.type === "PROFILE_VIEWED") {
+        refresh();
+        const uid = JSON.parse(localStorage.getItem("influnet_user") || "{}")?.id;
+        if (detail.toUserId && detail.toUserId !== uid) return;
+        pushToast({
+          title: "👀 Profile View",
+          body: detail.body || `${detail.fromName || "A business"} viewed your profile.`,
+          kind: "response",
+          actionLabel: "View Dashboard",
+        });
+      }
+
       if (
         detail.type === "REQUEST_ACCEPTED" ||
         detail.type === "REQUEST_REJECTED" ||

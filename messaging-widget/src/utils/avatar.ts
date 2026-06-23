@@ -9,8 +9,12 @@ const GRADIENTS: [string, string][] = [
 export function displayName(user?: {
   name?: string | null;
   companyName?: string | null;
+  username?: string | null;
 }): string {
-  return user?.name || user?.companyName || "User";
+  if (user?.companyName?.trim()) return user.companyName.trim();
+  if (user?.name?.trim()) return user.name.trim();
+  if (user?.username?.trim()) return `@${user.username.trim()}`;
+  return "";
 }
 
 export function initials(name: string): string {
@@ -25,6 +29,7 @@ export function gradientFor(seed: string): [string, string] {
 }
 
 export function userSubtitle(user?: {
+  presenceEnabled?: boolean;
   isTyping?: boolean;
   isOnline?: boolean;
   lastSeenAt?: string | null;
@@ -32,21 +37,25 @@ export function userSubtitle(user?: {
   industry?: string | null;
 }): string {
   if (!user) return "";
+  if (user.presenceEnabled === false) {
+    const niche = Array.isArray(user.niche)
+      ? user.niche.filter(Boolean).join(", ")
+      : user.niche;
+    if (niche) return niche;
+    if (user.industry) return user.industry;
+    return "";
+  }
   if (user.isTyping) return "Typing…";
   if (user.isOnline) return "Active now";
   if (user.lastSeenAt) {
-    const t = Date.now() - new Date(user.lastSeenAt).getTime();
-    if (t < 90000) return "Active now";
-    const m = Math.floor(t / 60000);
-    if (m < 60) return `Last seen ${m}m ago`;
-    const h = Math.floor(m / 60);
-    if (h < 24) return `Last seen ${h}h ago`;
-    return `Last seen ${Math.floor(h / 24)}d ago`;
+    const diff = Date.now() - new Date(user.lastSeenAt).getTime();
+    const mins = Math.floor(diff / 60_000);
+    if (mins < 60) return `Active ${mins} min${mins === 1 ? "" : "s"} ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `Active ${hours} hour${hours === 1 ? "" : "s"} ago`;
+    const days = Math.floor(hours / 24);
+    if (days === 1) return "Active yesterday";
+    return `Active ${days} days ago`;
   }
-  const niche = Array.isArray(user.niche)
-    ? user.niche.filter(Boolean).join(", ")
-    : user.niche;
-  if (niche) return niche;
-  if (user.industry) return user.industry;
-  return "On Influnet";
+  return "Last seen recently";
 }

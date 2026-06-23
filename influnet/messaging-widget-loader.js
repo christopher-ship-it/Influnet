@@ -2,8 +2,8 @@
  * Loads floating messaging widget on authenticated dashboard routes.
  */
 (function () {
-  const CSS = "/messaging/infl-messenger.css?v=3";
-  const JS = "/messaging/infl-messenger.js?v=3";
+  const CSS = "/messaging/infl-messenger.css?v=38";
+  const JS = "/messaging/infl-messenger.js?v=38";
 
   function isDashboard() {
     const path = window.location.pathname.replace(/\/$/, "") || "/";

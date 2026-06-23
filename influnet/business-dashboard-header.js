@@ -7,6 +7,11 @@
 (function () {
 
   try {
+  const RUN_ID = `biz-header-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  window.__inflBizHeaderRunId = RUN_ID;
+  function isLive() {
+    return window.__inflBizHeaderRunId === RUN_ID;
+  }
 
   const HERO_ID = "influnet-dashboard-hero";
 
@@ -48,11 +53,16 @@
 
 
   function isBusinessUser() {
-
-    const role = getUser()?.role;
-
-    return role && role !== "influencer";
-
+    const role = String(getUser()?.role || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "_");
+    return (
+      role === "business_owner" ||
+      role === "business" ||
+      role === "brand" ||
+      role === "businessowner"
+    );
   }
 
 
@@ -113,6 +123,61 @@
 
   function isBusinessDashboardShell() {
     return shouldApplyHomeShell();
+  }
+
+  const VERIFY_BANNER_ID = "influnet-biz-verify-banner";
+
+  function isBusinessVerificationPending(user) {
+    if (!user) return false;
+    const role = String(user.role || "")
+      .trim()
+      .toLowerCase()
+      .replace(/\s+/g, "_");
+    if (role !== "business_owner" && role !== "business") return false;
+    const status = String(user.approvalStatus || "pending_review").toLowerCase();
+    return status !== "approved" && status !== "rejected";
+  }
+
+  function syncVerificationBanner() {
+    const path = window.location.pathname.replace(/\/$/, "") || "/";
+    if (!path.startsWith("/dashboard") || path.startsWith("/dashboard/influencer")) {
+      document.getElementById(VERIFY_BANNER_ID)?.remove();
+      return;
+    }
+    if (!isBusinessUser()) {
+      document.getElementById(VERIFY_BANNER_ID)?.remove();
+      return;
+    }
+    // Bento home shows verification in status pills — avoid duplicate full-width banner.
+    if (isDashboardHomeActive()) {
+      document.getElementById(VERIFY_BANNER_ID)?.remove();
+      return;
+    }
+    if (
+      document.querySelector(
+        "[data-infl-biz-dashboard] .infl-bdash-verify-notice, [data-infl-biz-dashboard] .infl-bdash-status-pill--warn"
+      )
+    ) {
+      document.getElementById(VERIFY_BANNER_ID)?.remove();
+      return;
+    }
+    const pending = isBusinessVerificationPending(getUser());
+    const scroll = getScrollMain();
+    let banner = document.getElementById(VERIFY_BANNER_ID);
+    if (!pending) {
+      banner?.remove();
+      return;
+    }
+    if (!scroll) return;
+    if (!banner) {
+      banner = document.createElement("div");
+      banner.id = VERIFY_BANNER_ID;
+      banner.className = "influnet-biz-verify-banner";
+      banner.setAttribute("role", "status");
+      scroll.insertBefore(banner, scroll.firstChild);
+    }
+    banner.innerHTML =
+      "<p>Your account is being verified. We'll let you know once your business profile is approved.</p>";
   }
 
   function isDashboardHome() {
@@ -250,11 +315,11 @@
 
     if (!t) return null;
 
-    const fromPath = t.match(/influnet[/\\]([a-z0-9-]+)/i);
+    const fromPath = t.match(/influnet[/\\]([a-z0-9._-]+)/i);
 
     if (fromPath) return fromPath[1].toLowerCase();
 
-    if (/^[a-z0-9][a-z0-9-]*$/i.test(t)) return t.toLowerCase();
+    if (/^[a-z0-9][a-z0-9._-]{2,29}$/i.test(t)) return t.toLowerCase();
 
     return null;
 
@@ -263,51 +328,18 @@
 
 
   function buildHeroHtml() {
-
     return `
-
-      <section id="${HERO_ID}" class="influnet-dash-hero-section" aria-label="Creator search">
-
-        <div class="influnet-dash-hero-inner">
-
-          <div class="influnet-dash-hero-copy">
-
-            <h2>Find the right creator for your brand</h2>
-
-            <p>Search, connect and collaborate with verified creators.</p>
-
-            <form class="influnet-dash-search-wrap" data-influnet-search-form novalidate>
-
-              <input type="search" name="search" autocomplete="off"
-
-                placeholder="Search by URL or name..."
-
-                value="${escapeHtml(inputDisplayValue())}" aria-label="Search creators" />
-
-              <button type="button" class="influnet-dash-search-btn" data-influnet-search-submit aria-label="Search">${searchIconSvg()}</button>
-
-            </form>
-
-            <div id="${SEARCH_RESULTS_ID}" class="influnet-dash-search-results" hidden></div>
-
-          </div>
-
-          <div class="influnet-dash-hero-art">
-
-            <div class="influnet-dash-hero-image-slot is-empty" data-influnet-hero-image>
-
-              <img src="${HERO_IMAGE}" alt="" width="640" height="360" loading="eager" class="influnet-dash-hero-img" />
-
-              <span class="influnet-dash-hero-image-label">Hero image</span>
-
-            </div>
-
-          </div>
-
+      <section id="${HERO_ID}" class="influnet-dash-hero-section influnet-dash-hero-compact" aria-label="Creator search">
+        <div class="influnet-dash-search-anchor">
+          <form class="influnet-dash-search-wrap influnet-dash-search-compact" data-influnet-search-form novalidate>
+            <input type="search" name="search" autocomplete="off"
+              placeholder="Search creators by name or URL..."
+              value="${escapeHtml(inputDisplayValue())}" aria-label="Search creators" />
+            <button type="button" class="influnet-dash-search-btn" data-influnet-search-submit aria-label="Search">${searchIconSvg()}</button>
+          </form>
+          <div id="${SEARCH_RESULTS_ID}" class="influnet-dash-search-results" hidden></div>
         </div>
-
       </section>`;
-
   }
 
 
@@ -325,7 +357,7 @@
     nav.dataset.inflDashNavSync = "1";
     nav.addEventListener("click", () => {
       [0, 80, 200, 450, 900].forEach((ms) => {
-        window.setTimeout(scheduleEnhance, ms);
+        window.setTimeout(() => window.influnetSyncBusinessDashboardShell?.(), ms);
         window.setTimeout(() => window.influnetGuardBusinessMessages?.(), ms);
       });
     });
@@ -341,7 +373,23 @@
 
 
 
-  function renderSearchMessage(html) {
+  function hideSearchDropdown() {
+
+    const mount = getSearchResultsMount();
+
+    if (!mount) return;
+
+    mount.hidden = true;
+
+    mount.classList.remove("influnet-dash-search-results--open");
+
+    mount.innerHTML = "";
+
+  }
+
+
+
+  function showSearchDropdown(innerHtml) {
 
     const mount = getSearchResultsMount();
 
@@ -349,7 +397,57 @@
 
     mount.hidden = false;
 
-    mount.innerHTML = html;
+    mount.classList.add("influnet-dash-search-results--open");
+
+    mount.innerHTML = `<div class="influnet-dash-search-dropdown">${innerHtml}</div>`;
+
+  }
+
+
+
+  function renderSearchMessage(html) {
+
+    showSearchDropdown(html);
+
+  }
+
+
+
+  function buildSearchResultRow({ name, username, slug, niche, href, avatarContent }) {
+
+    const avatarInner =
+
+      avatarContent ||
+
+      escapeHtml((name || "C").trim().charAt(0).toUpperCase());
+
+    return `
+
+      <div class="influnet-dash-search-row">
+
+        <div class="influnet-dash-search-row-profile">
+
+          <div class="influnet-dash-search-card-avatar">${avatarInner}</div>
+
+          <div class="influnet-dash-search-row-text">
+
+            <p class="influnet-dash-search-card-name">${escapeHtml(name || "Creator")}</p>
+
+            <p class="influnet-dash-search-card-username">@${escapeHtml(username || slug || "username")}</p>
+
+            <p class="influnet-dash-search-card-niche">${escapeHtml(niche)}</p>
+
+          </div>
+
+        </div>
+
+        <div class="influnet-dash-search-row-actions">
+
+          <a class="influnet-dash-search-open-btn" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">View</a>
+
+        </div>
+
+      </div>`;
 
   }
 
@@ -429,7 +527,7 @@
 
     if (!mount) return;
 
-    const publicPath = `influnet/${slug}`;
+    const username = profile.username || slug;
 
     const href = `/influnet/${encodeURIComponent(slug)}`;
 
@@ -469,44 +567,43 @@
 
     }
 
-    mount.hidden = false;
-
-    mount.innerHTML = `
+    showSearchDropdown(`
 
       <div class="influnet-dash-search-results-head">
 
         <h3>Creator found</h3>
 
-        <span>${escapeHtml(publicPath)}</span>
+        <span>@${escapeHtml(username || "username")}</span>
 
       </div>
 
-      <div class="influnet-dash-search-public-card">
+      ${buildSearchResultRow({
 
-        <div class="influnet-dash-search-card-avatar">${avatarHtml}</div>
+        name: profile.name,
 
-        <div class="influnet-dash-search-card-body">
+        username: profile.username || slug,
 
-          <p class="influnet-dash-search-card-name">${escapeHtml(profile.name || "Creator")}</p>
+        slug,
 
-          <p class="influnet-dash-search-card-niche">${escapeHtml(nicheLabel(profile.niche))}</p>
+        niche: nicheLabel(profile.niche),
 
-          <p class="influnet-dash-search-card-handle">${escapeHtml(publicPath)}</p>
+        href,
 
-          ${profile.location ? `<p class="influnet-dash-search-card-loc">📍 ${escapeHtml(profile.location)}</p>` : ""}
+        avatarContent: avatarHtml,
 
-          ${bio ? `<p class="influnet-dash-search-card-bio">${escapeHtml(bio)}</p>` : ""}
+      })}
 
-          ${stats.length ? `<div class="influnet-dash-search-card-stats">${stats.map((s) => `<span class="influnet-dash-search-card-stat">${s}</span>`).join("")}</div>` : ""}
+      ${profile.location || bio || stats.length ? `
 
-        </div>
+      <div class="influnet-dash-search-public-details">
 
-        <div class="influnet-dash-search-card-actions">
-          <a class="influnet-dash-search-open-btn" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">View Profile</a>
-          <button type="button" class="influnet-dash-search-message-btn" data-infl-message-slug="${escapeHtml(slug)}">Message</button>
-        </div>
+        ${profile.location ? `<p class="influnet-dash-search-card-loc">📍 ${escapeHtml(profile.location)}</p>` : ""}
 
-      </div>`;
+        ${bio ? `<p class="influnet-dash-search-card-bio">${escapeHtml(bio)}</p>` : ""}
+
+        ${stats.length ? `<div class="influnet-dash-search-card-stats">${stats.map((s) => `<span class="influnet-dash-search-card-stat">${s}</span>`).join("")}</div>` : ""}
+
+      </div>` : ""}`);
 
   }
 
@@ -539,15 +636,7 @@
 
     if (!lastSearchQuery) {
 
-      const mount = getSearchResultsMount();
-
-      if (mount) {
-
-        mount.hidden = true;
-
-        mount.innerHTML = "";
-
-      }
+      hideSearchDropdown();
 
       return;
 
@@ -631,17 +720,13 @@
 
   function renderSearchResults(list) {
 
-    const mount = getSearchResultsMount();
-
-    if (!mount) return;
+    if (!getSearchResultsMount()) return;
 
 
 
     if (!list.length) {
 
-      mount.hidden = false;
-
-      mount.innerHTML = `
+      showSearchDropdown(`
 
         <div class="influnet-dash-search-empty">
 
@@ -649,7 +734,7 @@
 
           <p>Try <strong>influnet/creator-name</strong> or search by name.</p>
 
-        </div>`;
+        </div>`);
 
       return;
 
@@ -657,9 +742,7 @@
 
 
 
-    mount.hidden = false;
-
-    mount.innerHTML = `
+    showSearchDropdown(`
 
       <div class="influnet-dash-search-results-head">
 
@@ -669,7 +752,7 @@
 
       </div>
 
-      <div class="influnet-dash-search-grid">
+      <div class="influnet-dash-search-list">
 
         ${list
 
@@ -679,42 +762,29 @@
 
             const niche = Array.isArray(item.niche) ? item.niche[0] : item.niche || "Creator";
 
-            const ini = (item.name || "C").trim().charAt(0).toUpperCase();
-
-            const slug = item.profileSlug || parseInflunetSlug(item.publicPath) || "";
+            const slug = item.username || item.profileSlug || parseInflunetSlug(item.publicPath) || "";
 
             const href = slug ? `/influnet/${encodeURIComponent(slug)}` : "#";
 
-            const handle = item.publicPath || (slug ? `influnet/${slug}` : "");
+            return buildSearchResultRow({
 
-            return `
+              name: item.name,
 
-          <div class="influnet-dash-search-card">
+              username: item.username,
 
-            <div class="influnet-dash-search-card-avatar">${escapeHtml(ini)}</div>
+              slug,
 
-            <div class="influnet-dash-search-card-body">
+              niche,
 
-              <p class="influnet-dash-search-card-name">${escapeHtml(item.name || "Creator")}</p>
+              href,
 
-              <p class="influnet-dash-search-card-niche">${escapeHtml(niche)}</p>
-
-              ${handle ? `<p class="influnet-dash-search-card-handle">${escapeHtml(handle)}</p>` : ""}
-
-            </div>
-
-            <div class="influnet-dash-search-card-actions">
-              <a class="influnet-dash-search-open-btn" href="${escapeHtml(href)}" target="_blank" rel="noopener noreferrer">View</a>
-              ${slug ? `<button type="button" class="influnet-dash-search-message-btn" data-infl-message-slug="${escapeHtml(slug)}">Message</button>` : ""}
-            </div>
-
-          </div>`;
+            });
 
           })
 
           .join("")}
 
-      </div>`;
+      </div>`);
 
   }
 
@@ -762,11 +832,17 @@
 
     input?.addEventListener("input", () => {
       draftSearchQuery = input.value;
+      if (!String(input.value || "").trim()) {
+        runSearch("");
+      }
     });
 
     input?.addEventListener("paste", () => {
       window.setTimeout(() => {
         draftSearchQuery = input.value;
+        if (!String(input.value || "").trim()) {
+          runSearch("");
+        }
       }, 0);
     });
 
@@ -821,32 +897,39 @@
 
 
 
+  function dedupeHeroSections() {
+    const heroes = document.querySelectorAll(`[id="${HERO_ID}"]`);
+    for (let i = 1; i < heroes.length; i++) heroes[i].remove();
+    return heroes[0] || document.getElementById(HERO_ID);
+  }
+
   function mountHero() {
-
     const mount = document.getElementById(HERO_MOUNT);
-
     if (!mount) return;
 
+    let hero = dedupeHeroSections();
 
-
-    const existingInput = mount.querySelector('input[name="search"]');
-    if (existingInput && document.activeElement === existingInput) {
-      draftSearchQuery = existingInput.value;
-    } else if (existingInput?.value) {
-      draftSearchQuery = existingInput.value;
+    const input =
+      hero?.querySelector('input[name="search"]') ||
+      mount.querySelector('input[name="search"]');
+    if (input && document.activeElement === input) {
+      draftSearchQuery = input.value;
+    } else if (input?.value) {
+      draftSearchQuery = input.value;
     }
 
-    if (!mount.querySelector(`#${HERO_ID}`)) {
+    if (!hero) {
       mount.innerHTML = buildHeroHtml();
-      wireHeroImage(mount.querySelector("[data-influnet-hero-image]"));
-      bindSearchForm(mount);
+      hero = document.getElementById(HERO_ID);
       if (lastSearchQuery) runSearch(lastSearchQuery);
     } else {
       mount.querySelector("[data-influnet-chips], .influnet-dash-chips")?.remove();
-      wireHeroImage(mount.querySelector("[data-influnet-hero-image]"));
-      bindSearchForm(mount);
     }
 
+    wireHeroImage(mount.querySelector("[data-influnet-hero-image]"));
+    bindSearchForm(hero || mount);
+
+    window.influnetPortalBizSearch?.();
   }
 
 
@@ -874,6 +957,7 @@
 
 
   function enhance() {
+    if (!isLive()) return;
 
     if (applying) return;
 
@@ -892,6 +976,7 @@
         removeGreetingBanner();
         syncMessagesBodyClass();
       }
+      syncVerificationBanner();
       window.influnetGuardBusinessMessages?.();
       return;
     }
@@ -905,8 +990,8 @@
       tidyDashboardHeader(header);
       readUrlParams();
       scroll?.classList.add("influnet-dash-home-main");
-      mountGreetingBanner();
       mountHero();
+      syncVerificationBanner();
     } finally {
       applying = false;
     }
@@ -916,10 +1001,12 @@
 
 
   function scheduleEnhance() {
+    if (!isLive()) return;
 
     if (enhanceTimer) return;
 
     enhanceTimer = window.setTimeout(() => {
+      if (!isLive()) return;
 
       enhanceTimer = null;
 
@@ -935,19 +1022,30 @@
 
   document.addEventListener("DOMContentLoaded", scheduleEnhance);
 
+  window.addEventListener("influnet-user-updated", () => {
+    syncVerificationBanner();
+  });
+
   scheduleEnhance();
 
-  window.setInterval(() => {
+  if (window.__inflBizHeaderHeartbeat) {
+    clearInterval(window.__inflBizHeaderHeartbeat);
+  }
+  window.__inflBizHeaderHeartbeat = window.setInterval(() => {
+    if (!isLive()) return;
     if (window.location.pathname.replace(/\/$/, "") !== "/dashboard") return;
-    if (shouldApplyHomeShell()) {
-      scheduleEnhance();
-    } else if (isMessagesTabActive()) {
+    if (isMessagesTabActive()) {
       syncMessagesBodyClass();
       window.influnetGuardBusinessMessages?.();
     }
-  }, 3000);
+  }, 5000);
 
-  window.influnetSyncBusinessDashboardShell = scheduleEnhance;
+  window.influnetSyncBusinessDashboardShell = function () {
+    scheduleEnhance();
+    window.influnetSyncBusinessDashboardLayout?.(true);
+  };
+
+  window.influnetEnsureBizHeroSearch = mountHero;
 
   window.influnetClearBusinessHomeGreeting = function () {
     removeGreetingBanner();

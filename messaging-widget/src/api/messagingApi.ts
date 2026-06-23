@@ -1,4 +1,5 @@
-import type { Conversation, Message } from "../types";
+import type { Conversation, Message, MessageAttachment } from "../types";
+import { parseMessageBody } from "../utils/messageBody";
 
 function token(): string | null {
   return localStorage.getItem("influnet_token");
@@ -25,14 +26,67 @@ export async function fetchConversations(): Promise<Conversation[]> {
   return api<Conversation[]>("/api/conversations");
 }
 
-export async function fetchMessages(conversationId: string): Promise<Message[]> {
-  return api<Message[]>(`/api/conversations/${encodeURIComponent(conversationId)}/messages`);
+function normalizeMessage(raw: Message): Message {
+  const { text, attachments } = parseMessageBody(raw.body);
+  return { ...raw, body: text, attachments };
 }
 
-export async function sendMessage(conversationId: string, body: string): Promise<Message> {
-  return api<Message>(`/api/conversations/${encodeURIComponent(conversationId)}/messages`, {
+export async function fetchMessages(conversationId: string): Promise<Message[]> {
+  const rows = await api<Message[]>(
+    `/api/conversations/${encodeURIComponent(conversationId)}/messages`
+  );
+  return rows.map(normalizeMessage);
+}
+
+export async function sendMessage(
+  conversationId: string,
+  body: string,
+  attachments?: MessageAttachment[]
+): Promise<Message> {
+  const saved = await api<Message>(
+    `/api/conversations/${encodeURIComponent(conversationId)}/messages`,
+    {
+      method: "POST",
+      body: JSON.stringify({ body, attachments }),
+    }
+  );
+  return normalizeMessage(saved);
+}
+
+export async function uploadMessageAttachment(
+  conversationId: string,
+  file: File
+): Promise<MessageAttachment> {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Could not read file"));
+    reader.readAsDataURL(file);
+  });
+  return api<MessageAttachment>(
+    `/api/conversations/${encodeURIComponent(conversationId)}/attachments`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        fileName: file.name,
+        contentType: file.type,
+        dataUrl,
+      }),
+    }
+  );
+}
+
+export async function markConversationUnread(conversationId: string): Promise<void> {
+  await api(`/api/conversations/${encodeURIComponent(conversationId)}/unread`, {
     method: "POST",
-    body: JSON.stringify({ body }),
+  });
+}
+
+export async function deleteConversation(conversationId: string): Promise<void> {
+  await fetch(`/api/conversations/${encodeURIComponent(conversationId)}`, {
+    method: "DELETE",
+    credentials: "same-origin",
+    headers: token() ? { Authorization: `Bearer ${token()}` } : {},
   });
 }
 
@@ -46,6 +100,7 @@ export async function fetchConversationStatus(conversationId: string): Promise<{
   isOnline?: boolean;
   lastSeenAt?: string | null;
   typing?: boolean;
+  presenceEnabled?: boolean;
 }> {
   return api(`/api/conversations/${encodeURIComponent(conversationId)}/status`);
 }
@@ -82,4 +137,18 @@ export function loadArchivedIds(): Set<string> {
 
 export function saveArchivedIds(ids: Set<string>) {
   localStorage.setItem(ARCHIVED_KEY, JSON.stringify([...ids]));
+}
+
+const MUTED_KEY = "influnet_messenger_muted_v1";
+
+export function loadMutedIds(): Set<string> {
+  try {
+    return new Set(JSON.parse(localStorage.getItem(MUTED_KEY) || "[]"));
+  } catch {
+    return new Set();
+  }
+}
+
+export function saveMutedIds(ids: Set<string>) {
+  localStorage.setItem(MUTED_KEY, JSON.stringify([...ids]));
 }

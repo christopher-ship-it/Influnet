@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 export function TypingIndicator() {
   return (
     <div className="flex justify-start">
-      <div className="infl-glass border border-gray-100 dark:border-gray-700 rounded-2xl px-4 py-3 shadow-sm">
+      <div className="infl-msgs-bubble-in rounded-2xl px-4 py-3 shadow-sm">
         <span className="flex items-center gap-1">
           {[0, 1, 2].map((i) => (
             <motion.span

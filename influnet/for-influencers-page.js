@@ -55,7 +55,7 @@
               <p class="fb-close">Whether you're a micro creator, influencer, YouTuber, or content professional, Influnet helps you establish a stronger business presence and unlock new collaboration opportunities.</p>
 
               <div class="fb-actions">
-                <a href="/signup/influencer" class="fb-btn fb-btn-primary" data-testid="fi-get-started">Get Started</a>
+                <a href="/?#creator-signup" class="fb-btn fb-btn-primary" data-testid="fi-get-started">Get Started</a>
                 <a href="/login" class="fb-btn fb-btn-outline" data-testid="fi-login">Log In</a>
               </div>
             </div>

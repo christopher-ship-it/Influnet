@@ -4,7 +4,7 @@
 (function () {
   const PING_MS = 30000;
   const STATUS_MS = 2500;
-  const TYPING_HIDE_MS = 3500;
+  const TYPING_HIDE_MS = 2000;
   const TYPING_SEND_MS = 1500;
 
   let pingTimer = null;
@@ -12,6 +12,8 @@
   let activeConvId = null;
   let typingUntil = 0;
   let lastTypingSent = 0;
+  let collabRealtimeClient = null;
+  let collabRealtimeChannel = null;
 
   function isDashboard() {
     const path = window.location.pathname.replace(/\/$/, "") || "/";
@@ -23,25 +25,136 @@
   }
 
   function formatLastSeen(iso) {
-    if (!iso) return "";
+    if (!iso) return "Last seen recently";
     const t = Date.now() - new Date(iso).getTime();
-    if (t < 90000) return "Active now";
     const m = Math.floor(t / 60000);
-    if (m < 60) return "Last seen " + m + "m ago";
+    if (m < 60) return "Active " + m + " min" + (m === 1 ? "" : "s") + " ago";
     const h = Math.floor(m / 60);
-    if (h < 24) return "Last seen " + h + "h ago";
-    return "Last seen " + Math.floor(h / 24) + "d ago";
+    if (h < 24) return "Active " + h + " hour" + (h === 1 ? "" : "s") + " ago";
+    const d = Math.floor(h / 24);
+    if (d === 1) return "Active yesterday";
+    return "Active " + d + " days ago";
   }
 
   function statusLabel(data) {
+    if (data?.presenceEnabled === false) return null;
     if (data?.typing) return "Typing…";
     if (data?.isOnline) return "Active now";
     if (data?.lastSeenAt) return formatLastSeen(data.lastSeenAt);
+    if (data?.presenceEnabled) return "Last seen recently";
     return null;
   }
 
   function isStandaloneMessages() {
-    return !!document.getElementById("influnet-biz-msgs-standalone")?.offsetParent;
+    const host = document.getElementById("influnet-biz-msgs-standalone");
+    return !!host && host.style.display !== "none";
+  }
+
+  async function getCollabRealtimeClient() {
+    if (collabRealtimeClient) return collabRealtimeClient;
+    if (typeof window.influnetEnsureSupabase === "function") {
+      try {
+        collabRealtimeClient = await window.influnetEnsureSupabase();
+        return collabRealtimeClient;
+      } catch (_) {}
+    }
+    const cfg = window.INFLUNET_SUPABASE;
+    if (!cfg?.url || !cfg?.key) return null;
+    try {
+      const { createClient } = await import(
+        "https://esm.sh/@supabase/supabase-js@2.49.4"
+      );
+      collabRealtimeClient = createClient(cfg.url, cfg.key, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+        },
+      });
+      return collabRealtimeClient;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  function myUserIdFromToken() {
+    const token = getToken();
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(
+        atob(token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/"))
+      );
+      return payload.sub || null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  async function setupCollabRealtime() {
+    if (collabRealtimeChannel) return;
+    const sb = await getCollabRealtimeClient();
+    if (!sb) return;
+    const access = getToken();
+    const refresh = localStorage.getItem("influnet_refresh_token");
+    if (access && refresh) {
+      try {
+        await sb.auth.setSession({
+          access_token: access,
+          refresh_token: refresh,
+        });
+      } catch (_) {}
+    }
+    const uid = myUserIdFromToken();
+    if (!uid) return;
+
+    collabRealtimeChannel = sb
+      .channel("infl-global-collab-updates")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "collab_requests",
+        },
+        (payload) => {
+          const row = payload?.new;
+          if (!row || (row.from_user_id !== uid && row.to_user_id !== uid)) return;
+          const status = String(row.status || "").toLowerCase();
+          window.dispatchEvent(
+            new CustomEvent("influnet-dashboard-stale", {
+              detail: { reason: "collab_" + status },
+            })
+          );
+          window.dispatchEvent(
+            new CustomEvent("influnet-notification", {
+              detail: {
+                type:
+                  status === "accepted"
+                    ? "REQUEST_ACCEPTED"
+                    : status === "declined" || status === "cancelled"
+                      ? "REQUEST_REJECTED"
+                      : "collab_update",
+                requestId: row.id,
+                fromUserId: row.from_user_id,
+                toUserId: row.to_user_id,
+              },
+            })
+          );
+          if (status === "accepted") {
+            window.influnetSyncBusinessMessagesStandalone?.();
+          }
+        }
+      )
+      .subscribe();
+  }
+
+  function teardownCollabRealtime() {
+    try {
+      if (collabRealtimeChannel && collabRealtimeClient) {
+        collabRealtimeClient.removeChannel(collabRealtimeChannel);
+      }
+    } catch (_) {}
+    collabRealtimeChannel = null;
   }
 
   async function pingPresence() {
@@ -186,15 +299,25 @@
     if (document.documentElement.dataset.inflTypingWire) return;
     document.documentElement.dataset.inflTypingWire = "1";
     document.addEventListener(
-      "input",
+      "keydown",
       (e) => {
         if (!isMessagesView()) return;
         const inStandalone = e.target.closest("#infl-biz-msgs-form input[name='body']");
-        if (!inStandalone) return;
+        if (inStandalone) return;
+        const input = e.target.closest(
+          "main.flex-1 input[type='text'], main.flex-1 textarea"
+        );
+        if (!input) return;
         const convId =
           window.influnetBizMsgsActiveConversationId || activeConvId;
-        if (!convId || !e.target.value.trim()) return;
-        sendTypingPing(convId);
+        if (!convId || !input.value.trim()) return;
+        if (
+          e.key.length === 1 ||
+          e.key === "Backspace" ||
+          e.key === "Delete"
+        ) {
+          sendTypingPing(convId);
+        }
       },
       true
     );
@@ -226,14 +349,18 @@
       const data = await res.json();
       const label = statusLabel(data);
       const sub = getChatHeaderSubtitle();
-      if (sub && label) {
-        sub.textContent = label;
-        sub.setAttribute("data-infl-presence", "1");
+      if (sub) {
+        if (label) {
+          sub.textContent = label;
+          sub.setAttribute("data-infl-presence", "1");
+        } else if (sub.getAttribute("data-infl-presence") === "1") {
+          sub.removeAttribute("data-infl-presence");
+        }
       }
       if (data?.typing) {
         typingUntil = Date.now() + TYPING_HIDE_MS;
-        setTypingIndicator(true);
-      } else if (Date.now() > typingUntil) {
+        if (!isStandaloneMessages()) setTypingIndicator(true);
+      } else if (!isStandaloneMessages()) {
         setTypingIndicator(false);
       }
     } catch (_) {}
@@ -252,16 +379,29 @@
   }
 
   function boot() {
+    if (
+      document.body.classList.contains("infl-msgs-workspace-active") ||
+      document.getElementById("infl-msgs-workspace-root")
+    ) {
+      if (pingTimer) clearInterval(pingTimer);
+      if (statusTimer) clearInterval(statusTimer);
+      pingTimer = null;
+      statusTimer = null;
+      setTypingIndicator(false);
+      return;
+    }
     if (!isDashboard()) {
       if (pingTimer) clearInterval(pingTimer);
       if (statusTimer) clearInterval(statusTimer);
       pingTimer = null;
       statusTimer = null;
+      teardownCollabRealtime();
       return;
     }
     wireTypingInput();
     startPing();
     startStatusPoll();
+    setupCollabRealtime();
   }
 
   boot();

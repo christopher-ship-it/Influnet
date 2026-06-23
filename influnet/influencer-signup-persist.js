@@ -37,19 +37,42 @@
       const email = val('input[placeholder="you@example.com"]');
       if (email) draft.email = email;
 
-      const phone = val('input[placeholder="+91 98765 43210"]');
-      if (phone) draft.phone = phone;
+      const phone =
+        val("input.infl-phone-local") ||
+        val('input[placeholder="98765 43210"]') ||
+        val('input[placeholder="+91 98765 43210"]');
+      if (phone) {
+        const digits = phone.replace(/\D/g, "").slice(-10);
+        draft.phone = digits.length === 10 ? `+91 ${digits}` : phone;
+        draft.phoneLocal = digits.length === 10 ? digits : "";
+      }
 
-      const city = val('input[placeholder="e.g. Mumbai"]');
+      const otp = window.influnetPhoneOtp;
+      if (otp?.isSignupVerified?.()) {
+        draft.phoneVerified = true;
+        draft.phone = otp.getVerifiedPhone() || draft.phone;
+        draft.phoneLocal = otp.getPhoneLocal() || draft.phoneLocal;
+        draft.phoneVerificationToken = otp.getVerificationToken() || null;
+      }
+
+      const city =
+        document.querySelector("[data-isd-city] .isd-city-select")?.value?.trim() ||
+        document.querySelector("[data-isd-city] .isd-combo-input")?.value?.trim() ||
+        val('input[placeholder="e.g. Mumbai"]');
       if (city) draft.city = city;
 
       const genderSel = document.querySelector("select");
       if (genderSel?.value) draft.gender = genderSel.value;
 
-      const stateInput = val('input[placeholder="e.g. Tamil Nadu"]');
-      const stateSelect = document.querySelector("select.influnet-state-select");
-      if (stateSelect?.value) draft.state = stateSelect.value;
-      else if (stateInput) draft.state = stateInput;
+      const stateVal =
+        window.influnetSignupLocation?.getState?.() ||
+        document.querySelector("[data-isd-state] .isd-combo-input")?.value?.trim() ||
+        val('input[placeholder="e.g. Tamil Nadu"]');
+      const stateSelect =
+        document.querySelector("[data-isd-state] .isd-combo-input") ||
+        document.querySelector("select.influnet-state-select");
+      if (stateVal) draft.state = stateVal;
+      else if (stateSelect?.value) draft.state = stateSelect.value;
 
       if (city && draft.state) draft.location = `${city}, ${draft.state}`;
       else if (city) draft.location = city;
@@ -68,18 +91,38 @@
       );
       if (nicheSelects[0]?.value) draft.niche = [nicheSelects[0].value, nicheSelects[1]?.value].filter(Boolean);
 
+      const username =
+        window.influnetSignupUsername?.getValue?.() ||
+        document.getElementById("infl-signup-username-input")?.value?.trim().toLowerCase() ||
+        "";
+      if (username) draft.username = username.replace(/\s+/g, "");
+
       const social = {};
-      document.querySelectorAll(".flex.items-center.gap-3.bg-\\[\\#1a1a2a\\]").forEach((row) => {
+      const normalizeSocial = (platform, raw) => {
+        const trimmed = String(raw || "").trim();
+        if (!trimmed) return null;
+        const fromDataset =
+          typeof window.influnetSignupSocial?.normalizeValue === "function"
+            ? window.influnetSignupSocial.normalizeValue(platform, trimmed)
+            : null;
+        if (fromDataset) return fromDataset;
+        const soc = window.INFLUNET_SOCIAL;
+        if (soc?.normalizeForStorage) return soc.normalizeForStorage(platform, trimmed);
+        return trimmed;
+      };
+
+      document.querySelectorAll(".flex.items-center.gap-3").forEach((row) => {
         const label = row.querySelector("span.text-xs.font-semibold")?.textContent?.trim();
         const input = row.querySelector("input");
         if (!label || !input?.value?.trim()) return;
-        const v = input.value.trim();
-        if (label === "Instagram") social.instagramHandle = v;
-        if (label === "Facebook") social.facebookHandle = v;
-        if (label === "YouTube") social.youtubeHandle = v;
-        if (label === "LinkedIn") social.linkedinHandle = v;
-        if (label === "TikTok") social.tiktokHandle = v;
-        if (label.includes("Twitter")) social.twitterHandle = v;
+        const canonical = input.dataset.inflSocialUrl;
+        const v = canonical || input.value.trim();
+        if (label === "Instagram") social.instagramHandle = normalizeSocial("instagram", v);
+        if (label === "Facebook") social.facebookHandle = normalizeSocial("facebook", v);
+        if (label === "YouTube") social.youtubeHandle = normalizeSocial("youtube", v);
+        if (label === "LinkedIn") social.linkedinHandle = normalizeSocial("linkedin", v);
+        if (label === "TikTok") social.tiktokHandle = normalizeSocial("tiktok", v);
+        if (label.includes("Twitter")) social.twitterHandle = normalizeSocial("twitter", v);
       });
       Object.assign(draft, social);
 
@@ -95,10 +138,25 @@
         draft.collabTypes = collabs.map((l) => map[l]).filter(Boolean);
       }
 
-      const priceBtn = document.querySelector("button.rounded-xl.border.p-3.border-primary");
+      const priceBtns = [...document.querySelectorAll("button.rounded-xl.border.p-3")];
+      const priceBtn = priceBtns.find((b) => b.className.includes("border-primary"));
       if (priceBtn) {
-        const tier = priceBtn.querySelector(".text-\\[10px\\]")?.textContent?.trim().toLowerCase();
-        if (tier) draft.priceRange = tier;
+        const label = priceBtn.querySelector(".text-sm.font-semibold")?.textContent?.trim();
+        const tierText = priceBtn.querySelector(".text-\\[10px\\]")?.textContent?.trim().toLowerCase();
+        const labelMap = { Entry: "entry", Standard: "standard", Premium: "premium", Pro: "pro" };
+        if (labelMap[label]) {
+          draft.priceRange = labelMap[label];
+        } else if (["entry", "standard", "premium", "pro"].includes(tierText)) {
+          draft.priceRange = tierText;
+        } else if (tierText?.includes("1k")) {
+          draft.priceRange = "entry";
+        } else if (tierText?.includes("5k") && tierText?.includes("10k")) {
+          draft.priceRange = "standard";
+        } else if (tierText?.includes("10k") && tierText?.includes("25k")) {
+          draft.priceRange = "premium";
+        } else if (tierText?.includes("25k")) {
+          draft.priceRange = "pro";
+        }
       }
 
       saveDraft(draft);
@@ -117,31 +175,55 @@
             const draft = loadDraft();
             const merged = {
               ...body,
+              bio: body.bio || draft.bio || null,
+              niche: body.niche?.length ? body.niche : draft.niche || null,
+              instagramHandle: body.instagramHandle || draft.instagramHandle || null,
+              youtubeHandle: body.youtubeHandle || draft.youtubeHandle || null,
               gender: body.gender || draft.gender || null,
               facebookHandle: body.facebookHandle || draft.facebookHandle || null,
               linkedinHandle: body.linkedinHandle || draft.linkedinHandle || null,
               tiktokHandle: body.tiktokHandle || draft.tiktokHandle || null,
-              city: draft.city || null,
-              state: draft.state || null,
+              city: body.city || draft.city || null,
+              state: body.state || draft.state || null,
               location: body.location || draft.location || null,
-              languages: draft.languages || [],
-              collabTypes: draft.collabTypes || [],
-              priceRange: draft.priceRange || null,
+              languages: body.languages?.length ? body.languages : draft.languages || [],
+              collabTypes: body.collabTypes?.length ? body.collabTypes : draft.collabTypes || [],
+              priceRange: body.priceRange || draft.priceRange || null,
             };
+            merged.username = body.username || draft.username || null;
             if (!body.twitterHandle && draft.twitterHandle) {
               merged.twitterHandle = draft.twitterHandle;
             }
+            if (draft.phoneVerified && draft.phoneVerificationToken) {
+              merged.phone = draft.phone || body.phone || null;
+              merged.phoneVerificationToken = draft.phoneVerificationToken;
+            }
             newInit = { ...init, body: JSON.stringify(merged) };
-            sessionStorage.removeItem(DRAFT_KEY);
           } catch {
             /* keep original body */
           }
         }
-        return prev(input, newInit);
+        const response = await prev(input, newInit);
+        if (
+          url.includes("/api/auth/register") &&
+          response?.ok &&
+          isSignupPage()
+        ) {
+          sessionStorage.removeItem(DRAFT_KEY);
+        }
+        return response;
       };
     }
 
     hookRegister();
+    document.addEventListener(
+      "click",
+      (e) => {
+        const btn = e.target.closest("button");
+        if (btn?.textContent?.includes("Complete Signup")) captureDraft();
+      },
+      true
+    );
     setInterval(captureDraft, 800);
   } catch (e) {
     console.warn("[influnet] influencer-signup-persist:", e);

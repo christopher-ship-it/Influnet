@@ -86,12 +86,32 @@
 
     window.addEventListener("influnet-collab-accepted", (ev) => {
       const d = ev.detail || {};
+      window.influnetSyncBusinessMessagesStandalone?.();
       const user = JSON.parse(localStorage.getItem("influnet_user") || "null");
       const isInfluencer = user?.role === "influencer";
       const label = isInfluencer
         ? d.businessName || "Business"
         : d.influencerName || "Creator";
-      openMessagesWithPartner(label);
+
+      const tryOpen = async () => {
+        if (d.conversationId) {
+          const picked = await window.influnetBizMsgsSelectConversation?.(d.conversationId);
+          if (picked) return true;
+        }
+        return trySelectConversation(label);
+      };
+
+      navToMessages();
+      let attempts = 0;
+      const pick = async () => {
+        if (getActiveNavLabel().toLowerCase() !== "messages") return;
+        if (await tryOpen()) {
+          sessionStorage.removeItem(PENDING_CHAT_KEY);
+          return;
+        }
+        if (++attempts < 24) window.setTimeout(pick, 250);
+      };
+      window.setTimeout(pick, 200);
     });
 
     function tryReselectPending() {

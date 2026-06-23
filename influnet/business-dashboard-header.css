@@ -1,4 +1,23 @@
 /* Greeting lives in main content (not React header) on Dashboard home only */
+.influnet-biz-verify-banner {
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 1rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 0.65rem;
+  flex: 0 0 auto !important;
+  align-self: stretch;
+  width: 100%;
+}
+
+.influnet-biz-verify-banner p {
+  margin: 0;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.45;
+  color: #92400e;
+}
+
 .influnet-dash-greeting-banner {
   margin-bottom: 1rem;
 }
@@ -76,7 +95,7 @@
 
 #influnet-dashboard-hero-mount {
   width: 100%;
-  order: -1;
+  order: 0;
 }
 
 #influnet-dashboard-hero,
@@ -93,14 +112,14 @@
   display: grid;
   grid-template-columns: 1fr;
   gap: 1rem;
-  padding: 1.25rem 1.25rem 1.15rem;
+  padding: 0.9rem 1.1rem 0.85rem;
   align-items: center;
 }
 
 @media (min-width: 900px) {
   .influnet-dash-hero-inner {
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr);
-    padding: 1.15rem 1rem 1.15rem 2rem;
+    padding: 0.85rem 0.85rem 0.85rem 1.5rem;
     min-height: 0;
     align-items: center;
   }
@@ -116,7 +135,7 @@
 }
 
 .influnet-dash-hero-copy > p {
-  margin: 0.4rem 0 0.75rem;
+  margin: 0.3rem 0 0.5rem;
   font-size: 0.875rem;
   color: rgba(255, 255, 255, 0.92);
   max-width: 28rem;
@@ -127,19 +146,20 @@
   align-items: stretch;
   background: #fff;
   border-radius: 9999px;
-  padding: 0.25rem 0.25rem 0.25rem 1rem;
+  padding: 0.35rem 0.35rem 0.35rem 1.15rem;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  max-width: 34rem;
+  max-width: 44rem;
 }
 
 .influnet-dash-search-wrap input {
   flex: 1;
   border: none;
   outline: none;
-  font-size: 0.9rem;
+  font-size: 1rem;
   color: #111827;
   background: transparent;
   min-width: 0;
+  padding: 0.4rem 0;
 }
 
 .influnet-dash-search-wrap input::placeholder {
@@ -147,10 +167,10 @@
 }
 
 .influnet-dash-search-btn {
-  width: 2.4rem;
-  height: 2.4rem;
+  width: 2.8rem;
+  height: 2.8rem;
   border: none;
-  border-radius: 0.85rem;
+  border-radius: 1rem;
   background: #ee3e96;
   color: #fff;
   display: inline-flex;
@@ -169,22 +189,115 @@
   transform: scale(0.97);
 }
 
+.influnet-dash-search-anchor {
+  position: relative;
+  width: 100%;
+}
+
 .influnet-dash-search-results {
-  margin: 0.85rem 0 0;
-  max-width: 38rem;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  margin: 0.5rem 0 0;
+  z-index: 50;
   color: #111827;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  box-shadow:
+    0 20px 25px -5px rgba(15, 23, 42, 0.1),
+    0 8px 10px -6px rgba(15, 23, 42, 0.1);
+  opacity: 0;
+  transform: translateY(-6px) scale(0.98);
+  pointer-events: none;
+  transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
 .influnet-dash-search-results:not([hidden]) {
   display: block;
 }
 
+.influnet-dash-search-results.influnet-dash-search-results--open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+.influnet-dash-search-dropdown {
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+.influnet-dash-search-results-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem 0.65rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
 .influnet-dash-search-results-head h3 {
-  color: #fff;
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #0f172a;
 }
 
 .influnet-dash-search-results-head span {
-  color: rgba(255, 255, 255, 0.88);
+  font-size: 0.78rem;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.influnet-dash-search-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.influnet-dash-search-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.influnet-dash-search-row:last-child {
+  border-bottom: none;
+}
+
+.influnet-dash-search-row:hover {
+  background: #f8fafc;
+}
+
+.influnet-dash-search-row-profile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.influnet-dash-search-row-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
+
+.influnet-dash-search-row-actions {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.influnet-dash-search-public-details {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid #f1f5f9;
 }
 
 .influnet-dash-search-public-card {
@@ -266,18 +379,18 @@
 }
 
 .influnet-dash-search-open-btn {
-  margin-left: auto;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.55rem 1rem;
-  border-radius: 0.75rem;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.625rem;
   background: #ee3e96;
   color: #fff;
-  font-size: 0.82rem;
+  font-size: 0.875rem;
   font-weight: 700;
   text-decoration: none;
   white-space: nowrap;
+  transition: background-color 0.15s ease-in-out;
 }
 
 .influnet-dash-search-open-btn:hover {
@@ -288,26 +401,6 @@
   margin: 0.15rem 0 0;
   font-size: 0.72rem;
   color: #6b7280;
-}
-
-.influnet-dash-search-results-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
-  margin-bottom: 0.75rem;
-}
-
-.influnet-dash-search-results-head h3 {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #fff;
-}
-
-.influnet-dash-search-results-head span {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.88);
 }
 
 .influnet-dash-search-grid {
@@ -346,6 +439,14 @@
   justify-content: center;
   font-weight: 800;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.influnet-dash-search-card-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 999px;
 }
 
 .influnet-dash-search-card-body {
@@ -362,11 +463,21 @@
   text-overflow: ellipsis;
 }
 
+.influnet-dash-search-card-username {
+  margin: 0.15rem 0 0;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .influnet-dash-search-card-niche,
 .influnet-dash-search-card-handle {
   margin: 0.15rem 0 0;
-  font-size: 0.72rem;
-  color: #6b7280;
+  font-size: 0.75rem;
+  color: #94a3b8;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -378,9 +489,10 @@
 }
 
 .influnet-dash-search-status {
-  margin: 0.75rem 0 0;
+  margin: 0;
+  padding: 1rem;
   font-size: 0.875rem;
-  color: #6b7280;
+  color: #64748b;
 }
 
 .influnet-dash-search-error {
@@ -388,11 +500,7 @@
 }
 
 .influnet-dash-search-empty {
-  margin-top: 0.75rem;
   padding: 1rem 1.1rem;
-  border-radius: 1rem;
-  background: #fff;
-  border: 1px solid #eceef3;
 }
 
 .influnet-dash-search-empty h3 {
@@ -490,7 +598,7 @@
 
 .influnet-dash-hero-image-slot {
   width: 100%;
-  min-height: 160px;
+  min-height: 130px;
   border: 2px dashed rgba(255, 255, 255, 0.55);
   border-radius: 1rem;
   background: rgba(255, 255, 255, 0.1);
@@ -530,7 +638,7 @@
 .influnet-dash-hero-image-slot .influnet-dash-hero-img {
   width: 100%;
   height: auto;
-  max-height: 13.5rem;
+  max-height: 11.5rem;
   object-fit: contain;
   object-position: center right;
   display: block;
@@ -567,7 +675,7 @@
   min-height: 0;
 }
 
-.flex.h-screen > .flex-1.flex.flex-col.min-w-0 > main.flex-1 > * {
+.flex.h-screen > .flex-1.flex.flex-col.min-w-0 > main.flex-1 > *:not(.influnet-biz-verify-banner) {
   flex: 1 1 0;
   min-height: 0;
   min-width: 0;
@@ -605,7 +713,7 @@ body.infl-business-messages-view .influnet-react-messages-root {
   flex-direction: column !important;
 }
 
-body.infl-business-messages-view .flex.h-screen > .flex-1.flex.flex-col.min-w-0 > main.flex-1 > * {
+body.infl-business-messages-view .flex.h-screen > .flex-1.flex.flex-col.min-w-0 > main.flex-1 > *:not(.influnet-biz-verify-banner) {
   flex: 1 1 0 !important;
   min-height: 0 !important;
   min-width: 0 !important;
@@ -616,6 +724,58 @@ body.infl-business-messages-view .flex.h-screen > .flex-1.flex.flex-col.min-w-0 
   display: flex !important;
   flex-direction: column !important;
   visibility: visible !important;
+}
+
+body.infl-business-messages-view .flex.h-screen > .flex-1.flex.flex-col.min-w-0 > header {
+  justify-content: flex-end !important;
+}
+
+body.infl-business-messages-view
+  .flex.h-screen
+  > .flex-1.flex.flex-col.min-w-0
+  > header
+  > .text-sm.font-semibold.text-gray-800,
+body.infl-business-messages-view
+  .flex.h-screen
+  > .flex-1.flex.flex-col.min-w-0
+  > header
+  > span.text-sm,
+body.infl-business-messages-view
+  .flex.h-screen
+  > .flex-1.flex.flex-col.min-w-0
+  > header
+  .text-gray-800.font-semibold:not(.flex *),
+body.infl-business-messages-view
+  .flex.h-screen
+  > .flex-1.flex.flex-col.min-w-0
+  > header
+  .text-gray-800.font-medium:not(.flex *) {
+  display: none !important;
+}
+
+body.infl-business-messages-view
+  .flex.h-screen
+  > .flex-1.flex.flex-col.min-w-0
+  > header
+  > .flex.items-center.gap-3
+  > button.relative.p-2.rounded-xl,
+body.infl-business-messages-view
+  .flex.h-screen
+  > .flex-1.flex.flex-col.min-w-0
+  > header
+  > .flex.items-center.gap-3
+  > button.bg-violet-600 {
+  display: none !important;
+}
+
+body.infl-business-messages-view
+  .flex.h-screen
+  > .flex-1.flex.flex-col.min-w-0
+  > header
+  > .flex.items-center.gap-3
+  > .border-l.border-gray-100 {
+  border-left: none !important;
+  padding-left: 0 !important;
 }
 
 .influnet-dash-search-card-actions {
@@ -650,4 +810,68 @@ body.infl-business-messages-view .flex.h-screen > .flex-1.flex.flex-col.min-w-0 
   flex-direction: row;
   align-items: center;
   gap: 0.5rem;
+}
+
+/* Compact search (bento dashboard header integration) */
+.influnet-dash-hero-compact {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  overflow: visible !important;
+}
+
+.influnet-dash-hero-compact .influnet-dash-search-wrap,
+.influnet-dash-search-compact,
+.infl-bdash-search-slot .influnet-dash-search-wrap {
+  max-width: none;
+  width: 100%;
+  min-height: 2.5rem;
+  height: 2.5rem;
+  background: #fff;
+  border: 1px solid rgba(17, 24, 39, 0.08);
+  border-radius: 999px;
+  box-shadow: 0 2px 10px rgba(17, 24, 39, 0.05);
+  padding: 0.2rem 0.2rem 0.2rem 0.85rem;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.infl-bdash-search-slot .influnet-dash-search-wrap input,
+.influnet-dash-hero-compact .influnet-dash-search-wrap input,
+.influnet-dash-search-compact input {
+  font-size: 0.875rem;
+  padding: 0 2.5rem 0 0;
+  line-height: 1.25;
+}
+
+.infl-bdash-search-slot .influnet-dash-search-btn,
+.influnet-dash-hero-compact .influnet-dash-search-btn {
+  width: 2rem;
+  height: 2rem;
+  min-width: 2rem;
+  min-height: 2rem;
+  border-radius: 999px;
+  background: #111;
+}
+
+.influnet-dash-hero-compact .influnet-dash-search-btn:hover {
+  background: #222;
+}
+
+.infl-bdash-search-slot {
+  position: relative;
+  overflow: visible;
+}
+
+.infl-bdash-search-slot .influnet-dash-search-anchor {
+  position: relative;
+  z-index: 1;
+}
+
+.infl-bdash-search-slot .influnet-dash-search-results {
+  min-width: 100%;
+}
+
+#influnet-dashboard-hero-mount:empty {
+  display: none;
 }

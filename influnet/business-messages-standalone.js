@@ -8,6 +8,7 @@
   try {
     const HOST_ID = "influnet-biz-msgs-standalone";
     const LIVE_POLL_MS = 4000;
+    const REALTIME_POLL_FALLBACK_MS = 12000;
 
     function isBusinessDashboard() {
       const path = window.location.pathname.replace(/\/$/, "") || "/";
@@ -127,6 +128,62 @@
       });
     }
 
+    async function getRealtimeClient() {
+      if (realtimeClient) return realtimeClient;
+      if (typeof window.influnetEnsureSupabase === "function") {
+        try {
+          realtimeClient = await window.influnetEnsureSupabase();
+          return realtimeClient;
+        } catch (_) {}
+      }
+      if (realtimeReady) return realtimeReady;
+      const cfg = window.INFLUNET_SUPABASE;
+      if (!cfg?.url || !cfg?.key) return null;
+      realtimeReady = import("https://esm.sh/@supabase/supabase-js@2.49.4")
+        .then(({ createClient }) => {
+          realtimeClient = createClient(cfg.url, cfg.key, {
+            auth: {
+              persistSession: false,
+              autoRefreshToken: false,
+              detectSessionInUrl: false,
+            },
+          });
+          return realtimeClient;
+        })
+        .catch((error) => {
+          console.warn("[influnet] realtime init failed:", error);
+          return null;
+        });
+      return realtimeReady;
+    }
+
+    async function syncRealtimeAuth(sb) {
+      if (!sb?.auth) return;
+      const access = localStorage.getItem("influnet_token");
+      const refresh = localStorage.getItem("influnet_refresh_token");
+      if (!access || !refresh) return;
+      try {
+        await sb.auth.setSession({
+          access_token: access,
+          refresh_token: refresh,
+        });
+      } catch (error) {
+        console.warn("[influnet] realtime auth sync failed:", error);
+      }
+    }
+
+    function normalizeRealtimeMessage(row) {
+      if (!row?.id) return null;
+      return {
+        id: row.id,
+        conversationId: row.conversation_id || null,
+        senderUserId: row.sender_user_id || null,
+        body: row.body || "",
+        createdAt: row.created_at || new Date().toISOString(),
+        deleted: !!row.deleted_at || !!row.deleted,
+      };
+    }
+
     async function api(path, opts) {
       const token = localStorage.getItem("influnet_token");
       const res = await fetch(path, {
@@ -163,6 +220,7 @@
     function hideHost() {
       const host = document.getElementById(HOST_ID);
       if (host) host.style.display = "none";
+      unsubscribeRealtime();
       const main = getMain();
       if (main) {
         main.style.removeProperty("visibility");
@@ -190,6 +248,13 @@
       error: "",
       lastTypingSent: 0,
     };
+    let realtimeClient = null;
+    let realtimeReady = null;
+    let messagesChannel = null;
+    let presenceChannel = null;
+    let collabChannel = null;
+    let activeRealtimeConvId = null;
+    let realtimeSetupGen = 0;
 
     const AVATAR_GRADIENTS = [
       ["#ee3e96", "#f26e59"],
@@ -329,6 +394,19 @@
         .join("");
     }
 
+    function typingIndicatorHtml(active) {
+      if (!active?.otherUser?.isTyping) return "";
+      const label = escapeHtml(userDisplayName(active.otherUser));
+      return `<div class="infl-biz-msgs-typing" id="infl-biz-msgs-typing" aria-live="polite">
+        <span class="infl-biz-msgs-typing-label">${label} is typing</span>
+        <span class="infl-biz-msgs-typing-bubble" aria-hidden="true">
+          <span class="infl-biz-msgs-typing-dot"></span>
+          <span class="infl-biz-msgs-typing-dot"></span>
+          <span class="infl-biz-msgs-typing-dot"></span>
+        </span>
+      </div>`;
+    }
+
     function wireSearch(host) {
       const input = host.querySelector("#infl-biz-msgs-search");
       if (!input || input.dataset.inflWired) return;
@@ -349,6 +427,7 @@
           window.influnetBizMsgsActiveConversationId = state.activeId;
           await loadMessages(state.activeId, false);
           render(host);
+          await setupRealtimeForActiveConversation(host);
         });
       });
     }
@@ -434,6 +513,7 @@
                 </div>
               </header>
               <div class="infl-biz-msgs-bubbles" id="infl-biz-msgs-bubbles">${bubblesHtml()}</div>
+              ${typingIndicatorHtml(active)}
               <form class="infl-biz-msgs-compose" id="infl-biz-msgs-form">
                 <input type="text" name="body" placeholder="Type a message…" value="${escapeHtml(state.draft)}" autocomplete="off" />
                 <button type="submit" ${state.sending ? "disabled" : ""}>Send</button>
@@ -478,7 +558,7 @@
       const nameEl = host.querySelector(".infl-biz-msgs-thread-name");
       if (nameEl) nameEl.textContent = displayName(active);
       const statusEl = host.querySelector("#infl-biz-msgs-status");
-      if (statusEl && !statusEl.getAttribute("data-infl-presence")) {
+      if (statusEl) {
         statusEl.textContent = userSubtitle(active.otherUser);
       }
       const avatarSlot = host.querySelector(".infl-biz-msgs-thread-user");
@@ -488,6 +568,217 @@
         tmp.innerHTML = avatarHtml(active.otherUser, 40);
         const next = tmp.firstElementChild;
         if (existing && next) existing.replaceWith(next);
+      }
+      const typingWrap = host.querySelector("#infl-biz-msgs-typing");
+      const compose = host.querySelector("#infl-biz-msgs-form");
+      if (!compose) return;
+      const nextTyping = typingIndicatorHtml(active);
+      if (nextTyping) {
+        if (typingWrap) {
+          typingWrap.outerHTML = nextTyping;
+        } else {
+          compose.insertAdjacentHTML("beforebegin", nextTyping);
+        }
+      } else if (typingWrap) {
+        typingWrap.remove();
+      }
+    }
+
+    function appendMessageFromRealtime(host, msg) {
+      if (!msg?.id || msg.deleted) return;
+      if (String(msg.conversationId || "") !== String(state.activeId || "")) return;
+      if (state.messages.some((m) => String(m?.id || "") === String(msg.id))) return;
+      state.messages = [...state.messages, msg].sort(
+        (a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime()
+      );
+      state.conversations = state.conversations.map((c) => {
+        if (c.id !== state.activeId) return c;
+        return {
+          ...c,
+          lastMessage: msg.body || c.lastMessage || "",
+          lastMessageAt: msg.createdAt || c.lastMessageAt || null,
+          unreadCount: 0,
+        };
+      });
+      updateBubbles(host, true);
+      updateSidebar(host);
+    }
+
+    function applyPresenceRealtime(host, convId, payload) {
+      if (!payload?.new || !state.activeId || state.activeId !== convId) return;
+      const nowMs = Date.now();
+      const typingExpiresMs = payload.new.typing_expires_at
+        ? new Date(payload.new.typing_expires_at).getTime()
+        : 0;
+      const isTyping =
+        payload.new.typing_conversation_id === convId && typingExpiresMs > nowMs;
+      state.conversations = state.conversations.map((c) => {
+        if (c.id !== state.activeId || !c.otherUser) return c;
+        return {
+          ...c,
+          otherUser: {
+            ...c.otherUser,
+            isTyping,
+            lastSeenAt: payload.new.last_seen_at || c.otherUser.lastSeenAt || null,
+            isOnline:
+              !!payload.new.last_seen_at &&
+              nowMs - new Date(payload.new.last_seen_at).getTime() < 2 * 60 * 1000,
+          },
+        };
+      });
+      updateThreadHeader(host);
+      updateSidebar(host);
+    }
+
+    function clearOtherUserTyping(host, convId) {
+      state.conversations = state.conversations.map((c) => {
+        if (c.id !== convId || !c.otherUser) return c;
+        return {
+          ...c,
+          otherUser: { ...c.otherUser, isTyping: false },
+        };
+      });
+      updateThreadHeader(host);
+    }
+
+    function unsubscribeRealtime() {
+      try {
+        if (messagesChannel && realtimeClient) realtimeClient.removeChannel(messagesChannel);
+      } catch (_) {}
+      try {
+        if (presenceChannel && realtimeClient) realtimeClient.removeChannel(presenceChannel);
+      } catch (_) {}
+      try {
+        if (collabChannel && realtimeClient) realtimeClient.removeChannel(collabChannel);
+      } catch (_) {}
+      messagesChannel = null;
+      presenceChannel = null;
+      collabChannel = null;
+      activeRealtimeConvId = null;
+    }
+
+    async function setupRealtimeForActiveConversation(host) {
+      const convId = state.activeId;
+      if (!convId) {
+        unsubscribeRealtime();
+        return;
+      }
+      const setupGen = ++realtimeSetupGen;
+      unsubscribeRealtime();
+
+      const sb = await getRealtimeClient();
+      if (!sb || typeof sb.channel !== "function") return;
+      if (setupGen !== realtimeSetupGen || state.activeId !== convId) return;
+      await syncRealtimeAuth(sb);
+      if (setupGen !== realtimeSetupGen || state.activeId !== convId) return;
+
+      const uid = myUserId();
+      const activeConv = state.conversations.find((c) => c.id === convId) || null;
+      const otherId = activeConv?.otherUser?.id || null;
+
+      messagesChannel = sb
+        .channel(`infl-biz-msgs:${convId}`)
+        .on(
+          "postgres_changes",
+          {
+            event: "INSERT",
+            schema: "public",
+            table: "messages",
+            filter: `conversation_id=eq.${convId}`,
+          },
+          (payload) => {
+            if (state.activeId !== convId) return;
+            const msg = normalizeRealtimeMessage(payload?.new);
+            if (!msg) return;
+            appendMessageFromRealtime(host, msg);
+            if (msg.senderUserId && uid && msg.senderUserId !== uid) {
+              clearOtherUserTyping(host, convId);
+            }
+          }
+        )
+        .subscribe((status) => {
+          if (status === "CHANNEL_ERROR") {
+            console.warn("[influnet] messages realtime channel error");
+          }
+        });
+
+      if (otherId) {
+        presenceChannel = sb
+          .channel(`infl-biz-presence:${convId}:${otherId}`)
+          .on(
+            "postgres_changes",
+            {
+              event: "*",
+              schema: "public",
+              table: "user_presence",
+              filter: `user_id=eq.${otherId}`,
+            },
+            (payload) => {
+              if (state.activeId !== convId) return;
+              applyPresenceRealtime(host, convId, payload);
+            }
+          )
+          .subscribe();
+      }
+
+      activeRealtimeConvId = convId;
+    }
+
+    async function setupCollabRealtime(host) {
+      if (collabChannel) return;
+      const sb = await getRealtimeClient();
+      if (!sb || typeof sb.channel !== "function") return;
+      await syncRealtimeAuth(sb);
+      const uid = myUserId();
+      if (!uid) return;
+
+      collabChannel = sb
+        .channel("infl-biz-collab-updates")
+        .on(
+          "postgres_changes",
+          {
+            event: "UPDATE",
+            schema: "public",
+            table: "collab_requests",
+          },
+          async (payload) => {
+            const row = payload?.new;
+            if (!row) return;
+            if (row.from_user_id !== uid && row.to_user_id !== uid) return;
+            const status = String(row.status || "").toLowerCase();
+            if (status === "accepted") {
+              await loadConversations(true);
+              updateSidebar(host);
+              updateThreadHeader(host);
+            }
+          }
+        )
+        .subscribe();
+    }
+
+    async function selectConversationById(convId, host) {
+      if (!convId || !host) return false;
+      if (!state.conversations.some((c) => c.id === convId)) {
+        await loadConversations(true);
+      }
+      const match = state.conversations.find((c) => c.id === convId);
+      if (!match) return false;
+      state.activeId = convId;
+      window.influnetBizMsgsActiveConversationId = convId;
+      await loadMessages(convId, false);
+      render(host);
+      await setupRealtimeForActiveConversation(host);
+      return true;
+    }
+
+    async function refreshAfterCollabEvent(detail) {
+      const host = document.getElementById(HOST_ID);
+      if (!host || host.style.display === "none") return;
+      await loadConversations(true);
+      updateSidebar(host);
+      updateThreadHeader(host);
+      if (detail?.conversationId) {
+        await selectConversationById(detail.conversationId, host);
       }
     }
 
@@ -586,6 +877,14 @@
         clearInterval(liveTimer);
         liveTimer = null;
       }
+      unsubscribeRealtime();
+    }
+
+    function leaveMessagesTab() {
+      uiReady = false;
+      stopLivePoll();
+      window.influnetBizMsgsActiveConversationId = null;
+      hideHost();
     }
 
     function ensureNotBlockingInfluencer() {
@@ -621,6 +920,8 @@
 
         if (!uiReady) {
           await initialLoad(host);
+          await setupRealtimeForActiveConversation(host);
+          await setupCollabRealtime(host);
           startLivePoll();
         }
       } finally {
@@ -640,28 +941,40 @@
       }, 150);
     }
 
-    function resetAndSchedule() {
-      uiReady = false;
-      state.conversations = [];
-      state.messages = [];
-      state.activeId = null;
-      state.error = "";
-      state.draft = "";
-      lastMsgFp = "";
-      lastConvFp = "";
-      stopLivePoll();
-      window.influnetBizMsgsActiveConversationId = null;
-      scheduleSync();
+    function onNavClick(e) {
+      const btn = e.target.closest("button");
+      if (!btn || !getNav()?.contains(btn)) return;
+      const label = normalizeNavText(btn.textContent).toLowerCase();
+      if (label === "messages") {
+        scheduleSync();
+        return;
+      }
+      leaveMessagesTab();
     }
 
     function wireNav() {
       const nav = getNav();
       if (!nav || nav.dataset.inflBizMsgsStandalone) return;
       nav.dataset.inflBizMsgsStandalone = "1";
-      nav.addEventListener("click", resetAndSchedule);
+      nav.addEventListener("click", onNavClick);
+    }
+
+    function wireCollabEvents() {
+      if (window.__inflBizMsgsCollabWired) return;
+      window.__inflBizMsgsCollabWired = true;
+      window.addEventListener("influnet-collab-accepted", (ev) => {
+        refreshAfterCollabEvent(ev.detail || {});
+      });
+      window.addEventListener("influnet-notification", (ev) => {
+        const type = ev.detail?.type || "";
+        if (type === "REQUEST_ACCEPTED" || type === "conversation") {
+          refreshAfterCollabEvent(ev.detail || {});
+        }
+      });
     }
 
     wireNav();
+    wireCollabEvents();
     scheduleSync();
     ensureNotBlockingInfluencer();
     window.addEventListener("load", scheduleSync);
@@ -683,6 +996,16 @@
     };
     window.influnetHideBusinessMessagesStandalone = hideHost;
     window.influnetSyncBusinessMessagesStandalone = scheduleSync;
+    window.influnetBizMsgsSelectConversation = async (convId) => {
+      let host = document.getElementById(HOST_ID);
+      if (!host || host.style.display === "none") {
+        scheduleSync();
+        await new Promise((resolve) => window.setTimeout(resolve, 350));
+        host = document.getElementById(HOST_ID);
+      }
+      if (!host) return false;
+      return selectConversationById(convId, host);
+    };
   } catch (e) {
     console.warn("[influnet] business messages standalone:", e);
   }

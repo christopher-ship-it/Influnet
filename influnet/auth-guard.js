@@ -68,6 +68,16 @@
           window.location.replace("/dashboard/influencer");
           return;
         }
+        if (
+          data.user.role === "influencer" &&
+          (path === "/dashboard/settings" || path === "/dashboard/profile")
+        ) {
+          try {
+            sessionStorage.setItem("influnet_open_settings", path);
+          } catch (_) {}
+          window.location.replace("/dashboard/influencer");
+          return;
+        }
         if (data.user.role === "business_owner" && path.startsWith("/dashboard/influencer")) {
           window.location.replace("/dashboard");
           return;
@@ -83,8 +93,21 @@
     const style = document.createElement("style");
     style.textContent = "html.influnet-auth-check #root{visibility:hidden}";
     document.head.appendChild(style);
-    ensureAuth().finally(() => {
+
+    let revealed = false;
+    const reveal = () => {
+      if (revealed) return;
+      revealed = true;
       document.documentElement.classList.remove("influnet-auth-check");
+    };
+
+    const earlyTimer = window.setTimeout(reveal, 500);
+    const maxTimer = window.setTimeout(reveal, 4000);
+
+    ensureAuth().finally(() => {
+      window.clearTimeout(earlyTimer);
+      window.clearTimeout(maxTimer);
+      reveal();
     });
   }
 })();

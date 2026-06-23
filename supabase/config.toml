@@ -5,3 +5,9 @@ project_id = "hrpaqufvjcihnjrjnpej"
 
 [api]
 url = "https://hrpaqufvjcihnjrjnpej.supabase.co"
+
+[functions.phone-otp]
+verify_jwt = false
+
+[functions.auth-signup]
+verify_jwt = false

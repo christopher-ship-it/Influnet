@@ -1,10 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
-import { AnimatePresence } from "framer-motion";
+import { useEffect, useState } from "react";
 import { useMessagingStore } from "./store/messagingStore";
 import { useMessagingRealtime } from "./hooks/useMessagingRealtime";
+import { useIsMessagesPage } from "./hooks/useIsMessagesPage";
+import { useCollapseFloatingMessengerOnNav } from "./hooks/useCollapseFloatingMessengerOnNav";
 import { MessagingLauncher } from "./components/MessagingLauncher";
-import { ChatWindow } from "./components/ChatWindow";
+import { MessagesWorkspace } from "./components/MessagesWorkspace";
 import { NotificationToastStack } from "./components/NotificationToast";
+import { MessagingErrorBoundary } from "./components/MessagingErrorBoundary";
 import { SidebarBadgeHost } from "./components/SidebarBadgeHost";
 import { useNotificationRealtime } from "./hooks/useNotificationRealtime";
 import type { AuthUser } from "./types";
@@ -26,12 +28,12 @@ export function App() {
   const [user, setUser] = useState<AuthUser | null>(readUser);
   const [isMobile, setIsMobile] = useState(() => window.matchMedia("(max-width: 767px)").matches);
   const darkMode = useMessagingStore((s) => s.darkMode);
-  const openChatIds = useMessagingStore((s) => s.openChatIds);
-  const conversations = useMessagingStore((s) => s.conversations);
-  const openChat = useMessagingStore((s) => s.openChat);
-  const mobileFullscreen = useMessagingStore((s) => s.mobileFullscreen);
+  const onMessagesPage = useIsMessagesPage();
+
+  useCollapseFloatingMessengerOnNav(onMessagesPage);
 
   useMessagingRealtime();
+  useNotificationRealtime();
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
@@ -55,50 +57,22 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    document.body.classList.toggle("infl-floating-messenger-active", !!user && isDashboardRoute());
+    const showFloating = !!user && isDashboardRoute() && !onMessagesPage;
+    document.body.classList.toggle("infl-floating-messenger-active", showFloating);
     return () => document.body.classList.remove("infl-floating-messenger-active");
-  }, [user]);
-
-  const openConversations = useMemo(
-    () =>
-      openChatIds
-        .map((id) => conversations.find((c) => c.id === id))
-        .filter(Boolean) as typeof conversations,
-    [openChatIds, conversations]
-  );
+  }, [user, onMessagesPage]);
 
   if (!user || !isDashboardRoute()) return null;
 
-  const handleOpenChat = (id: string) => {
-    openChat(id);
-    if (isMobile) {
-      useMessagingStore.getState().setMobileFullscreen(false);
-      useMessagingStore.getState().setPanelExpanded(false);
-    }
-  };
-
   return (
-    <>
-      {!mobileFullscreen && (
-        <MessagingLauncher
-          currentUser={user}
-          isMobile={isMobile}
-          onOpenChat={handleOpenChat}
-        />
+    <MessagingErrorBoundary fallbackTitle="Messaging unavailable">
+      {onMessagesPage ? (
+        <MessagesWorkspace currentUser={user} isMobile={isMobile} />
+      ) : (
+        <MessagingLauncher currentUser={user} isMobile={isMobile} />
       )}
-      <AnimatePresence>
-        {openConversations.map((conv, i) => (
-          <ChatWindow
-            key={conv.id}
-            conversation={conv}
-            stackIndex={openConversations.length - 1 - i}
-            isMobile={isMobile}
-            myUserId={user.id}
-          />
-        ))}
-      </AnimatePresence>
       <SidebarBadgeHost />
       <NotificationToastStack />
-    </>
+    </MessagingErrorBoundary>
   );
 }

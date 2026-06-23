@@ -11,7 +11,6 @@ export function SidebarBadge({ count, color, pulse }: Props) {
 
   return (
     <motion.span
-      key={count}
       initial={{ scale: 0.6, opacity: 0 }}
       animate={{
         scale: pulse ? [1, 1.2, 1] : 1,

@@ -45,7 +45,7 @@
             <strong>The Business Operating System for Influencers and Brands.</strong>
           </p>
           <div class="cta-actions">
-            <a href="/signup" class="cta-btn cta-btn-primary" data-testid="cta-get-started">Get Started</a>
+            <a href="/?#creator-signup" class="cta-btn cta-btn-primary" data-testid="cta-get-started">Get Started</a>
             <a href="/support" class="cta-btn cta-btn-outline" data-testid="cta-book-demo">Book a Demo</a>
           </div>
         </div>
